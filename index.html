@@ -434,6 +434,52 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   #cal-grid>div{min-width:560px}
 }
 </style>
+  <!-- ══ SEO & RÉFÉRENCEMENT ══ -->
+<meta name="description" content="Blokly Study — Planifie ton blocus, révise intelligemment avec flashcards, timer focus et révisions espacées. L'outil étudiant tout-en-un.">
+<meta name="author" content="Bastien Leprince">
+<meta name="robots" content="index, follow">
+<meta name="keywords" content="blokly, blocus, planning étudiant, révision, flashcards, pomodoro, timer focus, examens, Belgique">
+
+<!-- ══ OPEN GRAPH (partage Facebook, WhatsApp, etc.) ══ -->
+<meta property="og:title" content="Blokly Study — Planifie ton blocus">
+<meta property="og:description" content="L'outil qui transforme le chaos du blocus en planning maîtrisé. Flashcards, timer focus, révisions espacées et plus encore.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bastien-lp.github.io/BloklyStudy/">
+<meta property="og:image" content="https://bastien-lp.github.io/BloklyStudy/preview.png">
+<meta property="og:locale" content="fr_BE">
+<meta property="og:site_name" content="Blokly Study">
+
+<!-- ══ TWITTER CARD ══ -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Blokly Study">
+<meta name="twitter:description" content="Planifie ton blocus intelligemment.">
+<meta name="twitter:image" content="https://bastien-lp.github.io/BloklyStudy/preview.png">
+
+<!-- ══ GOOGLE SEARCH CONSOLE ══ -->
+<meta name="google-site-verification" content="vA7iMsWEZQ7sLSiQaLiBONPJCSmDyOAeTWyVCJtGwGI">
+
+<!-- ══ GOOGLE ANALYTICS ══ -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0FHF0HDZ53"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-0FHF0HDZ53');
+
+  // Événements personnalisés Blokly
+  document.addEventListener('DOMContentLoaded', function() {
+    // Ces fonctions seront appelées depuis le code existant
+    window._gtagTabView = function(tabName) {
+      gtag('event', 'tab_view', { tab_name: tabName });
+    };
+    window._gtagSessionComplete = function(mins, xp) {
+      gtag('event', 'session_complete', { duration_mins: mins, xp_earned: xp });
+    };
+    window._gtagBlockDone = function() {
+      gtag('event', 'block_done');
+    };
+  });
+</script>
 </head>
 <body>
 
