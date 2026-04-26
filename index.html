@@ -1233,7 +1233,7 @@ import { getFirestore, doc, setDoc, getDoc, collection,
          getDocs, deleteDoc }                                 from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { getDatabase, ref as dbRef, set as dbSet,
          onValue, onDisconnect, serverTimestamp }             from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js';
-
+const FORMSPREE_URL = 'https://formspree.io/f/xrerjwey';
 const FC = {
   apiKey:            'AIzaSyC3NGYPMYax-_H1PobunXBrIr9hQDWfQqE',
   authDomain:        'bloklystudy-9a88f.firebaseapp.com',
@@ -1684,7 +1684,41 @@ function exportJSON(){ const data={subjects,blocks,journalEntries,srData,savedTe
 function importJSON(evt){ const file=evt.target.files[0];if(!file)return; const reader=new FileReader(); reader.onload=e=>{ try{ const d=JSON.parse(e.target.result); if(d.subjects)subjects=d.subjects;if(d.blocks)blocks=d.blocks; if(d.journalEntries)journalEntries=d.journalEntries;if(d.srData)srData=d.srData; if(d.flashcards)flashcards=d.flashcards;if(d.heatData)heatData=d.heatData; if(d.xp!==undefined)xp=d.xp;if(d.level!==undefined)level=d.level; if(d.unlockedThemes)unlockedThemes=d.unlockedThemes; if(d.earnedBadges)earnedBadges=new Set(d.earnedBadges); nid=safeMaxId(subjects.map(s=>s.id),blocks.map(b=>b.id)); scheduleSave();renderPlanning();renderExams();updateXPBar();showToast('✅ Import réussi !'); }catch(ex){showToast('❌ Fichier invalide.');} }; reader.readAsText(file);evt.target.value=''; }
 
 function setContactType(t,btn){currentContactType=t;document.querySelectorAll('.contact-type-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');}
-async function sendContact(){ const name=document.getElementById('ct-name').value.trim(); const msg=document.getElementById('ct-msg').value.trim(); if(!name||!msg){showToast('Remplis ton prénom et ton message.');return;} showToast('✅ Message envoyé ! Merci '+name+' 🙏'); document.getElementById('ct-name').value='';document.getElementById('ct-msg').value='';document.getElementById('ct-email').value=''; }
+
+async function sendContact() {
+  const name = document.getElementById('ct-name').value.trim();
+  const email = document.getElementById('ct-email').value.trim();
+  const msg = document.getElementById('ct-msg').value.trim();
+
+  if (!msg) { showToast('Écris un message avant d\'envoyer.'); return; }
+
+  try {
+    const res = await fetch(FORMSPREE_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        name: name || 'Anonyme',
+        email: email || '(non fourni)',
+        type: currentContactType,
+        message: msg
+      })
+    });
+
+    if (res.ok) {
+      showToast('✅ Message envoyé !');
+      document.getElementById('ct-name').value = '';
+      document.getElementById('ct-email').value = '';
+      document.getElementById('ct-msg').value = '';
+    } else {
+      showToast('❌ Erreur lors de l\'envoi.');
+    }
+  } catch (e) {
+    showToast('❌ Erreur réseau.');
+  }
+}
 
 Object.assign(window, {
   showLanding, showAuthPage,
