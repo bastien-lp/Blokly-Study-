@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="google-site-verification" content="vA7iMsWEZQ7sLSiQaLiBONPJCSmDyOAeTWyVCJtGwGI" />
-<title>Blokly Study V22</title>
+<title>Blokly Study — Planifie ton blocus intelligemment</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -27,6 +27,49 @@ html{font-size:16px}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .25s,color .25s;padding-bottom:44px}
 .app{max-width:1100px;margin:0 auto;padding:1.2rem 1rem 80px}
 
+/* ── LANDING PAGE ── */
+#landing-page{display:none;min-height:100vh;background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f2040 100%);flex-direction:column;}
+#landing-page.show{display:flex}
+
+.land-nav{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2rem;border-bottom:1px solid rgba(255,255,255,.07);}
+.land-logo{display:flex;align-items:center;gap:12px}
+.land-logo-blocks{display:flex;flex-direction:column;gap:3px}
+.land-logo-lb{height:7px;border-radius:3px}
+.land-logo-name{font-size:1.4rem;font-weight:700;color:#fff;letter-spacing:-.3px}
+.land-logo-sub{font-size:.58rem;color:rgba(255,255,255,.4);letter-spacing:.3em;text-transform:uppercase}
+.land-nav-actions{display:flex;gap:8px;align-items:center}
+.land-btn-ghost{padding:8px 18px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:transparent;color:rgba(255,255,255,.8);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s}
+.land-btn-ghost:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.4)}
+.land-btn-primary{padding:8px 18px;border:none;border-radius:8px;background:#4A90D9;color:#fff;font-size:.85rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.land-btn-primary:hover{opacity:.88}
+
+.land-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4rem 2rem 3rem;}
+.land-hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(74,144,217,.15);border:1px solid rgba(74,144,217,.3);border-radius:20px;padding:5px 14px;font-size:.75rem;color:#93c5fd;font-weight:600;margin-bottom:1.5rem;letter-spacing:.03em}
+.land-hero-title{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;color:#fff;line-height:1.15;margin-bottom:1rem;letter-spacing:-.02em}
+.land-hero-title span{background:linear-gradient(90deg,#4A90D9,#9B59B6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.land-hero-sub{font-size:1.05rem;color:rgba(255,255,255,.55);max-width:560px;line-height:1.7;margin-bottom:2.5rem}
+.land-hero-ctas{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:1rem}
+.land-cta-main{padding:13px 32px;border:none;border-radius:10px;background:linear-gradient(135deg,#4A90D9,#6366f1);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .15s,opacity .15s;box-shadow:0 4px 20px rgba(74,144,217,.4)}
+.land-cta-main:hover{transform:translateY(-2px);opacity:.92}
+.land-cta-secondary{padding:13px 28px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.85);font-size:1rem;font-weight:500;cursor:pointer;transition:all .15s}
+.land-cta-secondary:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35)}
+.land-hero-note{font-size:.75rem;color:rgba(255,255,255,.3)}
+
+.land-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:3rem 2rem;max-width:1100px;margin:0 auto;width:100%}
+.land-feat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.5rem;transition:border-color .2s,background .2s}
+.land-feat:hover{border-color:rgba(74,144,217,.4);background:rgba(74,144,217,.06)}
+.land-feat-ico{font-size:2rem;margin-bottom:.8rem}
+.land-feat-title{font-size:.95rem;font-weight:700;color:#fff;margin-bottom:.4rem}
+.land-feat-text{font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.65}
+
+.land-save-banner{background:rgba(74,144,217,.1);border-top:1px solid rgba(74,144,217,.2);border-bottom:1px solid rgba(74,144,217,.2);padding:1.2rem 2rem;text-align:center}
+.land-save-banner p{font-size:.9rem;color:rgba(255,255,255,.7);margin-bottom:.8rem}
+.land-save-banner strong{color:#93c5fd}
+.land-save-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+.land-footer{text-align:center;padding:1.5rem 2rem;color:rgba(255,255,255,.25);font-size:.75rem;border-top:1px solid rgba(255,255,255,.06)}
+.land-footer a{color:rgba(255,255,255,.4);text-decoration:none}
+
 /* ── LOADING ── */
 #loading-screen{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f2040 100%);z-index:2000;align-items:center;justify-content:center;flex-direction:column;gap:20px;}
 #loading-screen.show{display:flex}
@@ -46,7 +89,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 @keyframes loadDot{0%,80%,100%{opacity:0;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
 
 /* ── AUTH ── */
-#auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f2040 100%)}
+#auth-page{display:none;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0f0f1a 0%,#1a1a2e 50%,#0f2040 100%);flex-direction:column;gap:14px}
+#auth-page.show{display:flex}
+.auth-back-btn{background:transparent;border:none;color:rgba(255,255,255,.4);font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:5px;padding:4px 0;transition:color .2s}
+.auth-back-btn:hover{color:rgba(255,255,255,.8)}
 .auth-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:2.5rem;width:400px;max-width:95vw;backdrop-filter:blur(20px)}
 .auth-logo{display:flex;align-items:center;gap:14px;margin-bottom:2rem;justify-content:center}
 .auth-blocks{display:flex;flex-direction:column;gap:3px}
@@ -391,37 +437,31 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 .onboarding-btns{display:flex;gap:8px;justify-content:center}
 .xp-preview{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(87,255,43,0.15);border:1px solid rgba(87,255,43,0.4);color:#2aff00;font-family:'Courier New',monospace;}
 
-/* ── PRINT — 1 seule page A4 paysage ── */
+/* ── PRINT ── */
 @media print {
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  html, body { margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; }
-  #xp-bar-wrap, #study-bubble, #toast, #loading-screen, #auth-page,
-  #onboarding-overlay, #levelup-overlay, #focus-mode,
-  .top-bar, .tabs, #sync-banner, .ctx,
-  .modal-bg, .sidebar, .view-row, .leg, #overload-section,
-  button, .icon-btn, .nav-btn, .vtab, .tab, .tab-study { display: none !important; }
-  .app { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
-  .card { box-shadow: none !important; border: 1px solid #ccc !important; break-inside: avoid; }
-  .page { display: none !important; }
-  #page-planning { display: block !important; }
-  #page-planning.active { display: block !important; }
-  .planning-wrap { display: block !important; }
-  .cal-outer { overflow: visible !important; }
-  .cal-scroll { max-height: none !important; overflow: visible !important; }
-  /* Grille compacte sur une page */
-  #cal-grid > div {
-    min-width: 0 !important;
-    font-size: 7pt !important;
-    transform-origin: top left;
-  }
-  .rev-block { font-size: 6pt !important; padding: 1px 2px !important; }
-  #print-header { display: block !important; text-align: center; font-size: 11pt; font-weight: bold; margin-bottom: 4px; }
-  @page { size: A4 landscape; margin: 6mm; }
-  /* Force tout le contenu à tenir */
-  #page-planning .card { padding: 4px !important; margin-bottom: 2px !important; }
-  #cal-grid { zoom: 0.55; }
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  html,body{margin:0!important;padding:0!important;background:white!important;color:black!important}
+  #xp-bar-wrap,#study-bubble,#toast,#loading-screen,#auth-page,#landing-page,
+  #onboarding-overlay,#levelup-overlay,#focus-mode,
+  .top-bar,.tabs,#sync-banner,.ctx,
+  .modal-bg,.sidebar,.view-row,.leg,#overload-section,
+  button,.icon-btn,.nav-btn,.vtab,.tab,.tab-study{display:none!important}
+  .app{max-width:100%!important;padding:0!important;margin:0!important}
+  .card{box-shadow:none!important;border:1px solid #ccc!important;break-inside:avoid}
+  .page{display:none!important}
+  #page-planning{display:block!important}
+  #page-planning.active{display:block!important}
+  .planning-wrap{display:block!important}
+  .cal-outer{overflow:visible!important}
+  .cal-scroll{max-height:none!important;overflow:visible!important}
+  #cal-grid>div{min-width:0!important;font-size:7pt!important;transform-origin:top left}
+  .rev-block{font-size:6pt!important;padding:1px 2px!important}
+  #print-header{display:block!important;text-align:center;font-size:11pt;font-weight:bold;margin-bottom:4px}
+  @page{size:A4 landscape;margin:6mm}
+  #page-planning .card{padding:4px!important;margin-bottom:2px!important}
+  #cal-grid{zoom:0.55}
 }
-#print-header { display: none; }
+#print-header{display:none}
 
 @media(max-width:600px){
   .planning-wrap{flex-direction:column}
@@ -432,15 +472,16 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   .tabs{gap:2px}.tab{padding:5px 8px;font-size:.72rem}
   .cal-outer{overflow-x:auto}
   #cal-grid>div{min-width:560px}
+  .land-features{grid-template-columns:1fr;padding:2rem 1rem}
+  .land-hero{padding:2.5rem 1rem 2rem}
+  .land-nav{padding:.9rem 1rem}
 }
 </style>
-  <!-- ══ SEO & RÉFÉRENCEMENT ══ -->
+<!-- SEO -->
 <meta name="description" content="Blokly Study — Planifie ton blocus, révise intelligemment avec flashcards, timer focus et révisions espacées. L'outil étudiant tout-en-un.">
 <meta name="author" content="Bastien Leprince">
 <meta name="robots" content="index, follow">
 <meta name="keywords" content="blokly, blocus, planning étudiant, révision, flashcards, pomodoro, timer focus, examens, Belgique">
-
-<!-- ══ OPEN GRAPH (partage Facebook, WhatsApp, etc.) ══ -->
 <meta property="og:title" content="Blokly Study — Planifie ton blocus">
 <meta property="og:description" content="L'outil qui transforme le chaos du blocus en planning maîtrisé. Flashcards, timer focus, révisions espacées et plus encore.">
 <meta property="og:type" content="website">
@@ -448,36 +489,20 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 <meta property="og:image" content="https://bastien-lp.github.io/BloklyStudy/preview.png">
 <meta property="og:locale" content="fr_BE">
 <meta property="og:site_name" content="Blokly Study">
-
-<!-- ══ TWITTER CARD ══ -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Blokly Study">
 <meta name="twitter:description" content="Planifie ton blocus intelligemment.">
 <meta name="twitter:image" content="https://bastien-lp.github.io/BloklyStudy/preview.png">
-
-<!-- ══ GOOGLE SEARCH CONSOLE ══ -->
-<meta name="google-site-verification" content="vA7iMsWEZQ7sLSiQaLiBONPJCSmDyOAeTWyVCJtGwGI">
-
-<!-- ══ GOOGLE ANALYTICS ══ -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-0FHF0HDZ53"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
+  window.dataLayer=window.dataLayer||[];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-0FHF0HDZ53');
-
-  // Événements personnalisés Blokly
-  document.addEventListener('DOMContentLoaded', function() {
-    // Ces fonctions seront appelées depuis le code existant
-    window._gtagTabView = function(tabName) {
-      gtag('event', 'tab_view', { tab_name: tabName });
-    };
-    window._gtagSessionComplete = function(mins, xp) {
-      gtag('event', 'session_complete', { duration_mins: mins, xp_earned: xp });
-    };
-    window._gtagBlockDone = function() {
-      gtag('event', 'block_done');
-    };
+  gtag('js',new Date());
+  gtag('config','G-0FHF0HDZ53');
+  document.addEventListener('DOMContentLoaded',function(){
+    window._gtagTabView=function(n){gtag('event','tab_view',{tab_name:n});};
+    window._gtagSessionComplete=function(m,x){gtag('event','session_complete',{duration_mins:m,xp_earned:x});};
+    window._gtagBlockDone=function(){gtag('event','block_done');};
   });
 </script>
 </head>
@@ -485,6 +510,99 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 
 <div id="print-header">📅 Blokly Study — Planning de la semaine</div>
 
+<!-- ════════════════════════════════════
+     LANDING PAGE (publique, indexable)
+     ════════════════════════════════════ -->
+<div id="landing-page">
+
+  <!-- Nav -->
+  <nav class="land-nav">
+    <div class="land-logo">
+      <div class="land-logo-blocks">
+        <div class="land-logo-lb" style="width:28px;background:#E74C3C"></div>
+        <div class="land-logo-lb" style="width:28px;background:#F1C40F;margin-left:4px"></div>
+        <div class="land-logo-lb" style="width:28px;background:#27AE60;margin-left:8px"></div>
+      </div>
+      <div>
+        <div class="land-logo-name">Blokly</div>
+        <div class="land-logo-sub">Study</div>
+      </div>
+    </div>
+    <div class="land-nav-actions">
+      <button class="land-btn-ghost" onclick="showAuthPage('login')">Se connecter</button>
+      <button class="land-btn-primary" onclick="showAuthPage('signup')">Commencer gratuitement</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="land-hero">
+    <div class="land-hero-badge">🎓 Fait par un étudiant, pour les étudiants</div>
+    <h1 class="land-hero-title">
+      Transforme ton blocus<br>en <span>planning maîtrisé</span>
+    </h1>
+    <p class="land-hero-sub">
+      Blokly Study t'aide à organiser tes révisions, suivre ta progression,
+      mémoriser avec des flashcards et rester concentré avec un timer focus intelligent.
+    </p>
+    <div class="land-hero-ctas">
+      <button class="land-cta-main" onclick="showAuthPage('signup')">🚀 Créer mon compte gratuit</button>
+      <button class="land-cta-secondary" onclick="showAuthPage('login')">Me connecter</button>
+    </div>
+    <p class="land-hero-note">Gratuit · Pas de pub · Données sauvegardées dans le cloud ☁️</p>
+  </section>
+
+  <!-- Features -->
+  <section class="land-features">
+    <div class="land-feat">
+      <div class="land-feat-ico">📅</div>
+      <div class="land-feat-title">Planning visuel</div>
+      <div class="land-feat-text">Glisse tes matières dans un calendrier semaine ou mois. Visualise ta charge d'un coup d'œil.</div>
+    </div>
+    <div class="land-feat">
+      <div class="land-feat-ico">⏱️</div>
+      <div class="land-feat-title">Timer focus + XP</div>
+      <div class="land-feat-text">Lance un chronomètre Pomodoro ou libre. Gagne de l'XP, monte de niveau, débloque des thèmes.</div>
+    </div>
+    <div class="land-feat">
+      <div class="land-feat-ico">🃏</div>
+      <div class="land-feat-title">Flashcards</div>
+      <div class="land-feat-text">Crée des cartes par chapitre, entraîne-toi en mode quiz et suis ta maîtrise de chaque concept.</div>
+    </div>
+    <div class="land-feat">
+      <div class="land-feat-ico">🔁</div>
+      <div class="land-feat-title">Révisions espacées</div>
+      <div class="land-feat-text">Le système J1·J7·J30 te rappelle quand revoir chaque chapitre pour ancrer tes connaissances.</div>
+    </div>
+    <div class="land-feat">
+      <div class="land-feat-ico">📊</div>
+      <div class="land-feat-title">Progression & stats</div>
+      <div class="land-feat-text">Suis ta complétion par matière, tes séances de focus et ta progression globale vers les examens.</div>
+    </div>
+    <div class="land-feat">
+      <div class="land-feat-ico">☁️</div>
+      <div class="land-feat-title">Sync multi-appareils</div>
+      <div class="land-feat-text">Tes données sont sauvegardées automatiquement. Retrouve ton planning sur n'importe quel appareil.</div>
+    </div>
+  </section>
+
+  <!-- Bannière connexion -->
+  <div class="land-save-banner">
+    <p>🔐 <strong>Connecte-toi pour sauvegarder ton planning</strong> et le retrouver à chaque session</p>
+    <div class="land-save-btns">
+      <button class="land-btn-primary" onclick="showAuthPage('signup')">Créer un compte</button>
+      <button class="land-btn-ghost" onclick="showAuthPage('login')">J'ai déjà un compte</button>
+    </div>
+  </div>
+
+  <footer class="land-footer">
+    Blokly Study V24 · 2026 · <a href="#">Bastien Leprince</a> · HelMo Gramme, Liège 🇧🇪
+    &nbsp;·&nbsp; « S'investir c'est réussir »
+  </footer>
+</div>
+
+<!-- ════════════════════
+     LOADING
+     ════════════════════ -->
 <div id="loading-screen">
   <div class="loading-logo">
     <div class="loading-blocks">
@@ -495,19 +613,27 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   <div class="loading-msg">Chargement de tes données<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></div>
 </div>
 
+<!-- ════════════════════
+     LEVEL UP
+     ════════════════════ -->
 <div id="levelup-overlay">
   <div class="levelup-text" id="levelup-text">LEVEL UP!</div>
   <div class="levelup-sub" id="levelup-sub">Niveau 2 atteint 🎉</div>
   <div class="levelup-theme" id="levelup-theme"></div>
 </div>
 
+<!-- XP BAR -->
 <div id="xp-bar-wrap">
   <div id="xp-bar-inner" style="width:0%"></div>
   <div id="xp-level-badge">LVL 1 — 0 / 200 XP</div>
 </div>
 <div id="xp-flash"></div>
 
+<!-- ════════════════════
+     AUTH PAGE
+     ════════════════════ -->
 <div id="auth-page">
+  <button class="auth-back-btn" onclick="showLanding()">← Retour à l'accueil</button>
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-blocks">
@@ -531,6 +657,9 @@ button.danger-btn:hover{background:var(--red);color:#fff}
         <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.2 6.5 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.2 6.5 29.4 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-1.9 13.6-5l-6.3-5.1C29.6 35.6 26.9 36 24 36c-5.2 0-9.6-2.9-11.3-7L6 33.8C9.5 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.2-2.3 4-4.2 5.3l6.3 5.1C41.2 35.3 44 30 44 24c0-1.3-.1-2.7-.4-4z"/></svg>
         Continuer avec Google
       </button>
+      <div style="margin-top:14px;padding:10px 12px;background:rgba(74,144,217,.1);border-radius:8px;border:1px solid rgba(74,144,217,.2);font-size:.75rem;color:rgba(255,255,255,.6);text-align:center">
+        💾 Connecte-toi pour <strong style="color:#93c5fd">retrouver ton planning</strong> et sauvegarder tes révisions
+      </div>
     </div>
     <div id="auth-signup" style="display:none">
       <input class="auth-input" id="signup-email" type="email" placeholder="Email" autocomplete="email">
@@ -542,6 +671,9 @@ button.danger-btn:hover{background:var(--red);color:#fff}
         <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.7 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.2 6.5 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34.2 6.5 29.4 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-1.9 13.6-5l-6.3-5.1C29.6 35.6 26.9 36 24 36c-5.2 0-9.6-2.9-11.3-7L6 33.8C9.5 39.7 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.8 2.2-2.3 4-4.2 5.3l6.3 5.1C41.2 35.3 44 30 44 24c0-1.3-.1-2.7-.4-4z"/></svg>
         Continuer avec Google
       </button>
+      <div style="margin-top:14px;padding:10px 12px;background:rgba(39,174,96,.1);border-radius:8px;border:1px solid rgba(39,174,96,.2);font-size:.75rem;color:rgba(255,255,255,.6);text-align:center">
+        ✅ Compte gratuit · <strong style="color:#86efac">Sauvegarde automatique</strong> · Accès multi-appareils
+      </div>
     </div>
     <div class="auth-err" id="auth-err"></div>
     <div id="auth-loading" style="display:none" class="auth-loading">
@@ -551,6 +683,9 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   </div>
 </div>
 
+<!-- ════════════════════
+     ONBOARDING
+     ════════════════════ -->
 <div id="onboarding-overlay">
   <div class="onboarding-card">
     <div class="onboarding-step active" id="ob-step-0"><div class="onboarding-ico">👋</div><div class="onboarding-title">Bienvenue sur Blokly Study !</div><div class="onboarding-text">L'outil qui transforme ton blocus en planning maîtrisé.</div></div>
@@ -566,6 +701,9 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   </div>
 </div>
 
+<!-- ════════════════════
+     MAIN APP
+     ════════════════════ -->
 <div class="app" id="main-app" style="display:none">
   <div id="sync-banner">⚠️ Connexion perdue — données sauvegardées localement.</div>
   <div class="top-bar">
@@ -573,7 +711,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
       <div style="display:flex;flex-direction:column;gap:3px">
         <div class="lb lb1"></div><div class="lb lb2"></div><div class="lb lb3"></div>
       </div>
-      <div><div class="logo-name">Blokly</div><div class="logo-sub">Study V22</div></div>
+      <div><div class="logo-name">Blokly</div><div class="logo-sub">Study V24</div></div>
     </div>
     <div class="top-actions">
       <div id="presence-chip">👥 <span id="presence-count">0</span> en ligne</div>
@@ -788,7 +926,6 @@ button.danger-btn:hover{background:var(--red);color:#fff}
     <div class="card"><div class="section-title">Entrées précédentes</div><div id="journal-list"></div></div>
   </div>
 
-  <!-- À PROPOS — textes modifiés -->
   <div id="page-whoarewe" class="page">
     <div class="who-hero">
       <div class="who-hero-title">Blokly Study</div>
@@ -830,7 +967,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
         <button class="primary" onclick="sendContact()">Envoyer</button>
       </div>
       <div style="text-align:center;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
-        <div class="who-version-badge">🛠 Version 22 · 25/04/2026 · Blokly Study</div>
+        <div class="who-version-badge">🛠 Version 24 · 26/04/2026 · Blokly Study</div>
       </div>
     </div>
   </div>
@@ -921,6 +1058,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   </div>
 </div>
 
+<!-- FOCUS MODE -->
 <div id="focus-mode" role="dialog">
   <div style="position:absolute;inset:0;background:var(--bg);z-index:-1"></div>
   <div class="focus-ring-wrap">
@@ -1162,6 +1300,32 @@ const UNDO_MAX=10;
 let timerSessionElapsed=0;
 let earnedBadges=new Set();
 
+// ── Navigation landing / auth / app ──
+function showLanding(){
+  document.getElementById('landing-page').classList.add('show');
+  document.getElementById('auth-page').classList.remove('show');
+  document.getElementById('main-app').style.display='none';
+}
+function showAuthPage(tab='login'){
+  document.getElementById('landing-page').classList.remove('show');
+  document.getElementById('auth-page').classList.add('show');
+  showAuthTab(tab);
+  setAuthErr('');
+}
+
+// Au chargement : afficher la landing par défaut (si pas déjà connecté)
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('landing-page').classList.add('show');
+});
+
+// Déconnexion auto à la fermeture de l'onglet
+window.addEventListener('beforeunload', () => {
+  if(currentUser){
+    try{ signOut(auth); }catch(e){}
+    clearPresence();
+  }
+});
+
 const fmt  = d => d.getDate()+'/'+(d.getMonth()+1);
 const hm   = dec => { const h=Math.floor(dec),m=Math.round((dec%1)*60); return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0') };
 const hms  = s => String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
@@ -1204,13 +1368,14 @@ async function doLogin(){ const email=document.getElementById('login-email').val
 async function doSignup(){ const email=document.getElementById('signup-email').value.trim(); const pass=document.getElementById('signup-pass').value; const pass2=document.getElementById('signup-pass2').value; setAuthErr(''); if(!email||!pass){setAuthErr('Remplis tous les champs.');return;} if(!isValidEmail(email)){setAuthErr('Email invalide.');return;} if(pass!==pass2){setAuthErr('Les mots de passe ne correspondent pas.');return;} if(pass.length<6){setAuthErr('Mot de passe trop court.');return;} setAuthLoading(true,'Création du compte…'); try{ await createUserWithEmailAndPassword(auth,email,pass); } catch(e){ setAuthErr(firebaseErrMsg(e.code));setAuthLoading(false); } }
 async function doGoogleLogin(){ setAuthErr('');setAuthLoading(true,'Connexion Google…'); try{ const provider=new GoogleAuthProvider(); await signInWithPopup(auth,provider); } catch(e){ if(e.code!=='auth/popup-closed-by-user')setAuthErr(firebaseErrMsg(e.code));setAuthLoading(false); } }
 async function doForgotPassword(){ const email=document.getElementById('login-email').value.trim(); if(!email||!isValidEmail(email)){setAuthErr('Entre ton email pour réinitialiser ton mot de passe.');return;} try{ await sendPasswordResetEmail(auth,email);setAuthErr('📧 Email de réinitialisation envoyé !','success'); } catch(e){ setAuthErr(firebaseErrMsg(e.code)); } }
-async function doLogout(){ await saveToCloud(); clearPresence(); await signOut(auth); }
+async function doLogout(){ await saveToCloud(); clearPresence(); await signOut(auth); showLanding(); }
 function firebaseErrMsg(code){ const map={'auth/invalid-credential':'Email ou mot de passe incorrect.','auth/user-not-found':'Aucun compte avec cet email.','auth/wrong-password':'Mot de passe incorrect.','auth/email-already-in-use':'Cet email est déjà utilisé.','auth/weak-password':'Mot de passe trop faible.','auth/invalid-email':'Email invalide.','auth/too-many-requests':'Trop de tentatives. Réessaie plus tard.','auth/network-request-failed':'Erreur réseau.','auth/user-disabled':'Ce compte a été désactivé.','auth/popup-closed-by-user':'Connexion annulée.','auth/popup-blocked':'Popup bloquée par le navigateur.',}; return map[code]||'Erreur inattendue ('+code+').'; }
 
 onAuthStateChanged(auth, async user => {
   if(user){
     currentUser=user; setAuthLoading(false);
-    document.getElementById('auth-page').style.display='none';
+    document.getElementById('landing-page').classList.remove('show');
+    document.getElementById('auth-page').classList.remove('show');
     showLoading(); resetAppState();
     const cloudOk = await loadFromCloud();
     if(!cloudOk){ const lsOk = loadFromLS(); if(!lsOk && subjects.length===0) { hideLoading(); showOnboarding(); document.getElementById('main-app').style.display='block'; document.getElementById('xp-bar-wrap').classList.add('show'); return; } }
@@ -1229,7 +1394,13 @@ onAuthStateChanged(auth, async user => {
     renderPlanning(); renderExams(); setJMood('🙂'); populateStudySubjects(); populateJournalSubjects(); updateUndoButtons();
   } else {
     currentUser=null; if(autoSaveTimer){clearInterval(autoSaveTimer);autoSaveTimer=null;} clearPresence(); resetAppState(); hideLoading();
-    document.getElementById('auth-page').style.display='flex'; document.getElementById('main-app').style.display='none'; document.getElementById('xp-bar-wrap').classList.remove('show'); setAuthLoading(false); setAuthErr('');
+    document.getElementById('main-app').style.display='none';
+    document.getElementById('xp-bar-wrap').classList.remove('show');
+    setAuthLoading(false); setAuthErr('');
+    // Retour landing si l'utilisateur s'est déconnecté
+    if(!document.getElementById('auth-page').classList.contains('show')){
+      showLanding();
+    }
   }
 });
 
@@ -1321,10 +1492,8 @@ function setChapStatus(sid,idx,status){
   const s=subjects.find(x=>x.id===sid);if(!s||!s.chapters)return;
   s.chapters[idx].status=status;
   s.chapsDone=s.chapters.filter(c=>c.status==='done').length;
-  // Mémoriser les cartes ouvertes avant re-render
   const openCards=new Set([...document.querySelectorAll('.synth-chapters-wrap.open')].map(w=>w.closest('.synth-subject-card')?.querySelector('.synth-subject-title')?.textContent));
   renderSynth();
-  // Réouvrir les cartes qui étaient ouvertes
   document.querySelectorAll('.synth-subject-card').forEach(card=>{
     const title=card.querySelector('.synth-subject-title')?.textContent;
     if(openCards.has(title)){
@@ -1366,37 +1535,14 @@ function confirmDelSubj(){if(!pendingDelSubjId)return;const sid=pendingDelSubjId
 
 function renderXPStats(){ const el=document.getElementById('xp-stats-display');if(!el)return; const curDef=XP_LEVELS.find(l=>l.level===level)||XP_LEVELS[0]; const nextDef=XP_LEVELS.find(l=>l.level===level+1); const xpInLevel=nextDef?xp-curDef.xpNeeded:xp; const xpNeeded=nextDef?nextDef.xpNeeded-curDef.xpNeeded:0; const pct=nextDef?Math.round(xpInLevel/xpNeeded*100):100; el.innerHTML=`<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px"><div style="font-size:2.5rem;font-weight:900;font-family:'Courier New',monospace;color:var(--xp-color,#57FF2B)">LVL ${level}</div><div><div style="font-size:.88rem;font-weight:700;color:var(--text)">${curDef.label||'Étudiant'}</div><div style="font-size:.75rem;color:var(--text3)">${xp} XP total</div></div></div><div style="background:#1a1a1a;border-radius:4px;height:18px;overflow:hidden;position:relative;border:2px solid #000"><div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#2aff00,#57FF2B);transition:width .6s"></div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#fff;font-family:'Courier New',monospace;text-shadow:0 0 4px #000">${nextDef?`${xpInLevel} / ${xpNeeded} XP → Nv${level+1}`:'MAX LEVEL 🏆'}</div></div>`; }
 
-// ── PIE CHART — tous les blocs (fait + à faire) ──
 function renderPieChart(){
   const wrap=document.getElementById('pie-chart-wrap');if(!wrap)return;
-  // Total blocs par matière (tous statuts)
-  const bySubj=subjects.map(s=>({
-    name:s.name,
-    color:s.color,
-    total:blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length,
-    done:blocks.filter(b=>b.type==='rev'&&b.subj===s.id&&b.status==='done').length
-  })).filter(s=>s.total>0);
+  const bySubj=subjects.map(s=>({name:s.name,color:s.color,total:blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length,done:blocks.filter(b=>b.type==='rev'&&b.subj===s.id&&b.status==='done').length})).filter(s=>s.total>0);
   const grandTotal=bySubj.reduce((a,s)=>a+s.total,0);
   if(!grandTotal){wrap.innerHTML='<div style="color:var(--text3);font-size:.82rem;text-align:center;padding:1rem">Aucun bloc planifié.</div>';return;}
   const r=80,cx=100,cy=100;let angle=-Math.PI/2;
   let paths='';
-  bySubj.forEach(s=>{
-    const slice=s.total/grandTotal*2*Math.PI;
-    const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);
-    const x2=cx+r*Math.cos(angle+slice),y2=cy+r*Math.sin(angle+slice);
-    const large=slice>Math.PI?1:0;
-    // Tranche principale (opaque = à faire, translucide = effectués intégrés)
-    paths+=`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${s.color}" opacity=".9"/>`;
-    // Superposition hachurée pour les blocs effectués
-    if(s.done>0){
-      const doneSlice=s.done/grandTotal*2*Math.PI;
-      const dx1=cx+r*Math.cos(angle),dy1=cy+r*Math.sin(angle);
-      const dx2=cx+r*Math.cos(angle+doneSlice),dy2=cy+r*Math.sin(angle+doneSlice);
-      const dlarge=doneSlice>Math.PI?1:0;
-      paths+=`<path d="M${cx},${cy} L${dx1.toFixed(1)},${dy1.toFixed(1)} A${r},${r} 0 ${dlarge},1 ${dx2.toFixed(1)},${dy2.toFixed(1)} Z" fill="#fff" opacity=".25"/>`;
-    }
-    angle+=slice;
-  });
+  bySubj.forEach(s=>{const slice=s.total/grandTotal*2*Math.PI;const x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle);const x2=cx+r*Math.cos(angle+slice),y2=cy+r*Math.sin(angle+slice);const large=slice>Math.PI?1:0;paths+=`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${large},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${s.color}" opacity=".9"/>`;if(s.done>0){const doneSlice=s.done/grandTotal*2*Math.PI;const dx1=cx+r*Math.cos(angle),dy1=cy+r*Math.sin(angle);const dx2=cx+r*Math.cos(angle+doneSlice),dy2=cy+r*Math.sin(angle+doneSlice);const dlarge=doneSlice>Math.PI?1:0;paths+=`<path d="M${cx},${cy} L${dx1.toFixed(1)},${dy1.toFixed(1)} A${r},${r} 0 ${dlarge},1 ${dx2.toFixed(1)},${dy2.toFixed(1)} Z" fill="#fff" opacity=".25"/>`;}angle+=slice;});
   const legend=bySubj.map(s=>`<div class="pie-leg-item"><div class="pie-leg-dot" style="background:${s.color}"></div><span>${s.name} — ${s.total} blocs (${s.done} ✅ · ${Math.round(s.total/grandTotal*100)}%)</span></div>`).join('');
   wrap.innerHTML=`<div style="font-size:.75rem;color:var(--text3);margin-bottom:8px">Zone claire = blocs effectués · Zone pleine = à faire</div><div class="pie-wrap"><svg width="200" height="200" viewBox="0 0 200 200" style="flex-shrink:0">${paths}<circle cx="${cx}" cy="${cy}" r="28" fill="var(--card-bg)"/><text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="10" fill="var(--text2)" font-weight="bold">${grandTotal}</text><text x="${cx}" y="${cy+16}" text-anchor="middle" font-size="7" fill="var(--text3)">blocs</text></svg><div class="pie-legend">${legend}</div></div>`;
 }
@@ -1450,52 +1596,22 @@ function hideBubble(){bubbleHidden=true;document.getElementById('study-bubble').
 function enterFocusMode(){focusModeActive=true;document.getElementById('focus-mode').classList.add('active');}
 function exitFocusMode(){focusModeActive=false;document.getElementById('focus-mode').classList.remove('active');}
 
-// ── SONS AMÉLIORÉS ──
 function setSound(s){
   currentSound=s;
   document.querySelectorAll('.sound-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('snd-'+s)?.classList.add('active');
   if(!audioCtx) try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
-  // Stop sons précédents
   if(soundNodes.src){try{soundNodes.src.stop();}catch(e){}}
   if(soundNodes.osc){try{soundNodes.osc.stop();}catch(e){}}
+  if(soundNodes._oscR){try{soundNodes._oscR.stop();}catch(e){}}
   soundNodes={};
   if(s==='none') return;
-
   const vol=parseFloat(document.getElementById('vol-slider').value);
-  const masterGain=audioCtx.createGain();
-  masterGain.gain.value=vol;
-  masterGain.connect(audioCtx.destination);
+  const masterGain=audioCtx.createGain();masterGain.gain.value=vol;masterGain.connect(audioCtx.destination);
+  if(s==='rain'){const bufSize=audioCtx.sampleRate*4;const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);const data=buf.getChannelData(0);let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;for(let i=0;i<bufSize;i++){const white=Math.random()*2-1;b0=0.99886*b0+white*0.0555179;b1=0.99332*b1+white*0.0750759;b2=0.96900*b2+white*0.1538520;b3=0.86650*b3+white*0.3104856;b4=0.55000*b4+white*0.5329522;b5=-0.7616*b5-white*0.0168980;data[i]=(b0+b1+b2+b3+b4+b5+b6+white*0.5362)*0.11;b6=white*0.115926;}const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;src.connect(masterGain);src.start();soundNodes={src,gain:masterGain};}
+  else if(s==='white'){const bufSize=audioCtx.sampleRate*2;const buf=audioCtx.createBuffer(2,bufSize,audioCtx.sampleRate);for(let ch=0;ch<2;ch++){const d=buf.getChannelData(ch);for(let i=0;i<bufSize;i++)d[i]=Math.random()*2-1;}const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;const filter=audioCtx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=400;filter.Q.value=0.8;src.connect(filter);filter.connect(masterGain);src.start();soundNodes={src,gain:masterGain};}
 
-  if(s==='rain'){
-    // Bruit rose : filtrage du bruit blanc
-    const bufSize=audioCtx.sampleRate*4;
-    const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
-    const data=buf.getChannelData(0);
-    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
-    for(let i=0;i<bufSize;i++){
-      const white=Math.random()*2-1;
-      b0=0.99886*b0+white*0.0555179;b1=0.99332*b1+white*0.0750759;
-      b2=0.96900*b2+white*0.1538520;b3=0.86650*b3+white*0.3104856;
-      b4=0.55000*b4+white*0.5329522;b5=-0.7616*b5-white*0.0168980;
-      data[i]=(b0+b1+b2+b3+b4+b5+b6+white*0.5362)*0.11;b6=white*0.115926;
-    }
-    const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;
-    src.connect(masterGain);src.start();
-    soundNodes={src,gain:masterGain};
-
-  } else if(s==='white'){
-    // Bruit blanc filtré grave (océan)
-    const bufSize=audioCtx.sampleRate*2;
-    const buf=audioCtx.createBuffer(2,bufSize,audioCtx.sampleRate);
-    for(let ch=0;ch<2;ch++){const d=buf.getChannelData(ch);for(let i=0;i<bufSize;i++)d[i]=Math.random()*2-1;}
-    const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;
-    const filter=audioCtx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=400;filter.Q.value=0.8;
-    src.connect(filter);filter.connect(masterGain);src.start();
-    soundNodes={src,gain:masterGain};
-
-  } else if(s==='fire'){
-    // Bruit brun (crépitement)
+  else if(s==='fire'){
     const bufSize=audioCtx.sampleRate*3;
     const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
     const data=buf.getChannelData(0);
@@ -1504,8 +1620,8 @@ function setSound(s){
       const white=Math.random()*2-1;
       lastOut=(lastOut+0.02*white)/1.02;
       data[i]=lastOut*3.5;
-      if(data[i]>1) data[i]=1;
-      if(data[i]<-1) data[i]=-1;
+      if(data[i]>1)data[i]=1;
+      if(data[i]<-1)data[i]=-1;
     }
     const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;
     const filter=audioCtx.createBiquadFilter();filter.type='lowshelf';filter.frequency.value=200;filter.gain.value=6;
@@ -1513,7 +1629,6 @@ function setSound(s){
     soundNodes={src,gain:masterGain};
 
   } else if(s==='forest'){
-    // Simulation forêt : bruit filtré + modulation lente (vent)
     const bufSize=audioCtx.sampleRate*4;
     const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
     const data=buf.getChannelData(0);
@@ -1526,7 +1641,6 @@ function setSound(s){
       data[i]=(b0+b1+b2+b3+b4+b5+b6+white*0.5362)*0.08;b6=white*0.115926;
     }
     const src=audioCtx.createBufferSource();src.buffer=buf;src.loop=true;
-    // LFO pour vent
     const lfo=audioCtx.createOscillator();lfo.frequency.value=0.05;
     const lfoGain=audioCtx.createGain();lfoGain.gain.value=0.4;
     lfo.connect(lfoGain);
@@ -1537,33 +1651,18 @@ function setSound(s){
     soundNodes={src,osc:lfo,gain:masterGain};
 
   } else if(s==='alpha'){
-    // Battements binauraux alpha 10Hz (différence entre les deux oreilles)
     const baseFreq=200;
-    const splitter=audioCtx.createChannelMerger(2);
-    splitter.connect(masterGain);
     const oscL=audioCtx.createOscillator(),oscR=audioCtx.createOscillator();
     oscL.frequency.value=baseFreq;oscR.frequency.value=baseFreq+10;
     oscL.type='sine';oscR.type='sine';
-    const gL=audioCtx.createGain(),gR=audioCtx.createGain();
-    gL.gain.value=0.15;gR.gain.value=0.15;
-    // Canal gauche
-    oscL.connect(gL);
-    const mrgL=audioCtx.createChannelMerger(2);
-    gL.connect(mrgL,0,0);
-    // On utilise un script processor pour router L/R séparément
-    // Simplification : on les mélange légèrement
     const fade=audioCtx.createGain();fade.gain.value=0.15;
-    oscL.connect(fade);oscR.connect(fade);
-    fade.connect(masterGain);
+    oscL.connect(fade);oscR.connect(fade);fade.connect(masterGain);
     oscL.start();oscR.start();
-    // Petit léger bruit de fond pour confort
     const bufSize=audioCtx.sampleRate*2;
     const buf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);
     const d=buf.getChannelData(0);for(let i=0;i<bufSize;i++)d[i]=(Math.random()*2-1)*0.02;
     const nSrc=audioCtx.createBufferSource();nSrc.buffer=buf;nSrc.loop=true;nSrc.connect(masterGain);nSrc.start();
-    soundNodes={src:nSrc,osc:oscL,gain:masterGain};
-    // Keep references to stop
-    soundNodes._oscR=oscR;
+    soundNodes={src:nSrc,osc:oscL,_oscR:oscR,gain:masterGain};
   }
 }
 
@@ -1573,7 +1672,7 @@ function openTemplates(){ showTplTab('presets'); openModal('modal-templates'); }
 function showTplTab(tab){ document.getElementById('tpl-presets-panel').style.display=tab==='presets'?'block':'none'; document.getElementById('tpl-saved-panel').style.display=tab==='saved'?'block':'none'; document.getElementById('tpl-tab-presets').classList.toggle('active',tab==='presets'); document.getElementById('tpl-tab-saved').classList.toggle('active',tab==='saved'); if(tab==='saved') renderSavedTemplates(); }
 function renderSavedTemplates(){ const el=document.getElementById('tpl-saved-list'); if(!savedTemplates.length){ el.innerHTML='<div style="color:var(--text3);font-size:.82rem;text-align:center;padding:1rem">Aucun template sauvegardé.<br>Organise ta semaine et sauvegarde-la ci-dessus.</div>'; return; } el.innerHTML=savedTemplates.map((t,i)=>`<div class="tpl-saved-item"><div style="font-size:1.2rem">📋</div><div style="flex:1"><div class="tpl-saved-name">${t.name}</div><div class="tpl-saved-meta">${t.blocks.length} bloc(s) · Créé le ${t.createdAt||'—'}</div></div><button class="primary" style="font-size:.72rem;padding:5px 10px" onclick="applyNamedTemplate(${i})">Appliquer</button><button class="ghost" style="font-size:.72rem;padding:5px 8px;color:var(--danger-text)" onclick="deleteNamedTemplate(${i})">🗑</button></div>`).join(''); }
 function saveCurrentWeekAsTemplate(){ const nameEl=document.getElementById('tpl-save-name'); const name=nameEl.value.trim(); if(!name){showToast('Donne un nom au template.');return;} const weekBlocks=blocks.filter(b=>b.weekOffset===wkOff); if(!weekBlocks.length){showToast('Aucun bloc dans la semaine actuelle.');return;} const normalized=weekBlocks.map(b=>({type:b.type,subj:b.subj||null,day:b.day,hour:b.hour,dur:b.dur,status:'todo',task:b.task||'',label:b.label||''})); savedTemplates.push({name,blocks:normalized,createdAt:new Date().toLocaleDateString('fr-FR')}); nameEl.value=''; renderSavedTemplates(); scheduleSave(); showToast('✅ Template "'+name+'" sauvegardé !'); }
-function applyNamedTemplate(idx){ const tpl=savedTemplates[idx]; if(!tpl){return;} pushUndo(); tpl.blocks.forEach(b=>{ const newBlock={id:nid++,type:b.type,day:b.day,weekOffset:wkOff,hour:b.hour,dur:b.dur,status:'todo',task:b.task||''}; if(b.type==='rev'){ newBlock.subj=b.subj; } if(b.type==='pause'){ newBlock.label=b.label||'Pause'; } blocks.push(newBlock); }); subjects.forEach(s=>{s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length;}); closeModal('modal-templates'); renderPlanning(); scheduleSave(); showToast('📋 Template "'+tpl.name+'" appliqué !'); }
+function applyNamedTemplate(idx){ const tpl=savedTemplates[idx]; if(!tpl)return; pushUndo(); tpl.blocks.forEach(b=>{ const nb={id:nid++,type:b.type,day:b.day,weekOffset:wkOff,hour:b.hour,dur:b.dur,status:'todo',task:b.task||''}; if(b.type==='rev')nb.subj=b.subj; if(b.type==='pause')nb.label=b.label||'Pause'; blocks.push(nb); }); subjects.forEach(s=>{s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length;}); closeModal('modal-templates'); renderPlanning(); scheduleSave(); showToast('📋 Template "'+tpl.name+'" appliqué !'); }
 function deleteNamedTemplate(idx){ showConfirm('🗑 Supprimer ce template ?','',()=>{ savedTemplates.splice(idx,1); renderSavedTemplates(); scheduleSave(); showToast('Template supprimé.'); }); }
 function applyPresetTemplate(t){ if(!subjects.length){showToast('Ajoute d\'abord des matières.');closeModal('modal-templates');return;} pushUndo(); const slots={light:[[9,2],[14,2]],normal:[[8,2],[13,2],[17,2]],intensive:[[8,2],[11,2],[14,2],[17,2]]}; const s=slots[t]||slots['normal']; let added=0; for(let d=0;d<5;d++){s.forEach(([h,dur])=>{const sid=subjects[added%subjects.length].id;blocks.push({id:nid++,type:'rev',subj:sid,day:d,weekOffset:wkOff,hour:h,dur,status:'todo',task:''});added++;});} subjects.forEach(s=>{s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length;}); closeModal('modal-templates');renderPlanning();scheduleSave();showToast('📋 Template prédéfini appliqué !'); }
 function applyTemplate(t){ applyPresetTemplate(t); }
@@ -1581,13 +1680,14 @@ function applyTemplate(t){ applyPresetTemplate(t); }
 function runExpress(){ if(!subjects.length){showToast('Ajoute d\'abord des matières.');return;} const list=document.getElementById('express-list'); list.innerHTML=subjects.map(s=>{if(!s.date)return'';const d=Math.max(0,Math.ceil((new Date(s.date)-TODAY)/86400000));return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><div class="dot" style="background:${s.color}"></div><div style="flex:1"><div style="font-size:.85rem;font-weight:600;color:var(--text)">${s.name}</div><div style="font-size:.75rem;color:var(--text3)">${d}j restants</div></div></div>`;}).join(''); expressBlocks=subjects.filter(s=>s.date).sort((a,b)=>new Date(a.date)-new Date(b.date)); openModal('modal-express'); }
 function applyExpress(){ if(!expressBlocks.length){closeModal('modal-express');return;} pushUndo(); expressBlocks.forEach((s,i)=>{ const d=Math.max(0,Math.ceil((new Date(s.date)-TODAY)/86400000)); const priority=d<7?3:d<14?2:1; for(let w=0;w<Math.min(priority,2);w++){blocks.push({id:nid++,type:'rev',subj:s.id,day:i%5,weekOffset:wkOff+w,hour:9+i*2%8,dur:2,status:'todo',task:'Express'});} s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length; }); closeModal('modal-express');renderPlanning();scheduleSave();showToast('⚡ Planning express appliqué !'); }
 
-function exportJSON(){ const data={subjects,blocks,journalEntries,srData,savedTemplates,heatData,flashcards,streak,xp,level,unlockedThemes,currentTheme,earnedBadges:[...earnedBadges]}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='blokly_v22.json';a.click(); }
+function exportJSON(){ const data={subjects,blocks,journalEntries,srData,savedTemplates,heatData,flashcards,streak,xp,level,unlockedThemes,currentTheme,earnedBadges:[...earnedBadges]}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='blokly_v24.json';a.click(); }
 function importJSON(evt){ const file=evt.target.files[0];if(!file)return; const reader=new FileReader(); reader.onload=e=>{ try{ const d=JSON.parse(e.target.result); if(d.subjects)subjects=d.subjects;if(d.blocks)blocks=d.blocks; if(d.journalEntries)journalEntries=d.journalEntries;if(d.srData)srData=d.srData; if(d.flashcards)flashcards=d.flashcards;if(d.heatData)heatData=d.heatData; if(d.xp!==undefined)xp=d.xp;if(d.level!==undefined)level=d.level; if(d.unlockedThemes)unlockedThemes=d.unlockedThemes; if(d.earnedBadges)earnedBadges=new Set(d.earnedBadges); nid=safeMaxId(subjects.map(s=>s.id),blocks.map(b=>b.id)); scheduleSave();renderPlanning();renderExams();updateXPBar();showToast('✅ Import réussi !'); }catch(ex){showToast('❌ Fichier invalide.');} }; reader.readAsText(file);evt.target.value=''; }
 
 function setContactType(t,btn){currentContactType=t;document.querySelectorAll('.contact-type-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');}
 async function sendContact(){ const name=document.getElementById('ct-name').value.trim(); const msg=document.getElementById('ct-msg').value.trim(); if(!name||!msg){showToast('Remplis ton prénom et ton message.');return;} showToast('✅ Message envoyé ! Merci '+name+' 🙏'); document.getElementById('ct-name').value='';document.getElementById('ct-msg').value='';document.getElementById('ct-email').value=''; }
 
 Object.assign(window, {
+  showLanding, showAuthPage,
   doLogin,doSignup,doLogout,doGoogleLogin,doForgotPassword,showAuthTab,
   showOnboarding,nextOnboarding,skipOnboarding,finishOnboarding,
   switchTab,setView,changeNav,toggleDark,showSyncInfo,
