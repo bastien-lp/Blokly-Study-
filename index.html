@@ -308,7 +308,7 @@ body.dark .pause-blk{background:rgba(40,40,70,0.92)}
 .ec{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;position:relative;transition:box-shadow .15s}
 .ec:hover{box-shadow:var(--shadow)}
 .edel{position:absolute;top:8px;right:10px;background:var(--danger-bg);border:none;cursor:pointer;font-size:.78rem;color:var(--danger-text);border-radius:4px;padding:2px 7px;font-weight:600}
-.erename{position:absolute;top:8px;right:46px;background:var(--info-bg);border:none;cursor:pointer;font-size:.78rem;color:var(--info-text);border-radius:4px;padding:2px 7px;font-weight:600}
+.erename{position:absolute;top:8px;right:10px;background:var(--info-bg);border:none;cursor:pointer;font-size:.78rem;color:var(--info-text);border-radius:4px;padding:2px 7px;font-weight:600}
 .edays{font-size:1.5rem;font-weight:700;margin:.3rem 0 .1rem}
 .urgent{color:var(--red)}.soon{color:var(--orange)}.ok{color:var(--green)}
 .badges-grid{display:flex;flex-wrap:wrap;gap:10px}
@@ -1802,7 +1802,7 @@ let todaySess=0,todayMins=0,streak=0;
 let heatData=Array.from({length:28},()=>0);
 let darkMode=false,jMoodCurrent='🙂';
 let journalEntries=[],expressBlocks=[],savedTemplates=[],srData={};
-let selectedDayForModal=0,focusModeActive=false,pendingDelSubjId=null;
+let selectedDayForModal=0,focusModeActive=false,pendingDelSubjId=null,ctxSubjId=null;
 let currentSound='none',audioCtx=null,soundNodes={};
 let currentContactType='suggestion';
 let editingChapSid=null,editingChapIdx=null;
@@ -2072,6 +2072,14 @@ function renderPreblocks(){
   let isDraggingToCalendar=false;
 
   pb.querySelectorAll('.preblock').forEach(el=>{
+    el.addEventListener('contextmenu',e=>{
+      e.preventDefault();
+      ctxSubjId=+el.dataset.sid;
+      const menu=document.getElementById('ctx-subj-menu');
+      menu.style.display='block';
+      menu.style.left=e.clientX+'px';
+      menu.style.top=e.clientY+'px';
+    });
     el.addEventListener('dragstart',e=>{
       const idx=parseInt(el.dataset.idx);
       const sid=parseInt(el.dataset.sid);
@@ -2560,11 +2568,16 @@ function openDelSubjFromEdit(){
   if(!pendingRenameSubjId)return;
   const s=subjects.find(x=>x.id===pendingRenameSubjId);
   if(!s)return;
+  pendingDelSubjId = pendingRenameSubjId;
   closeModal('modal-rename-subj');
   const bCount=blocks.filter(b=>b.type==='rev'&&b.subj===pendingRenameSubjId).length;
   document.getElementById('del-subj-msg').textContent=`"${s.name}" — ${bCount} bloc(s) associé(s).`;
   openModal('modal-del-subj');
 }
+
+document.addEventListener('click',e=>{const menu=document.getElementById('ctx-subj-menu');if(!menu.contains(e.target))menu.style.display='none';});
+document.getElementById('ctx-btn-rename').addEventListener('mousedown',e=>{e.stopPropagation();document.getElementById('ctx-subj-menu').style.display='none';openRenameSubj(ctxSubjId,null);});
+document.getElementById('ctx-btn-del').addEventListener('mousedown',e=>{e.stopPropagation();document.getElementById('ctx-subj-menu').style.display='none';openDelSubj(ctxSubjId,null);});
 
 function renderXPStats(){
   const el=document.getElementById('xp-stats-display');if(!el)return;
@@ -2915,40 +2928,7 @@ function runExpress(){ if(!subjects.length){showToast('Ajoute d\'abord des mati�
 function applyExpress(){ if(!expressBlocks.length){closeModal('modal-express');return;} pushUndo(); expressBlocks.forEach((s,i)=>{ const d=Math.max(0,Math.ceil((new Date(s.date)-TODAY)/86400000)); const priority=d<7?3:d<14?2:1; for(let w=0;w<Math.min(priority,2);w++){blocks.push({id:nid++,type:'rev',subj:s.id,day:i%5,weekOffset:wkOff+w,hour:9+i*2%8,dur:2,status:'todo',task:'Express'});} s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length; }); closeModal('modal-express');renderPlanning();scheduleSave();showToast('⚡ Planning express appliqué !'); }
 
 function exportJSON(){ const data={subjects,blocks,journalEntries,srData,savedTemplates,heatData,flashcards,streak,xp,level,unlockedThemes,currentTheme,earnedBadges:[...earnedBadges]}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='blokly_v24.json';a.click(); }
-function importJSON(evt) {
-  const file = evt.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const d = JSON.parse(e.target.result);
-      
-      // ✅ Ne jamais toucher aux données d'auth
-      // Importer uniquement les données "contenu"
-      if(d.subjects)   subjects = d.subjects;
-      if(d.blocks)     blocks = d.blocks;
-      if(d.journalEntries) journalEntries = d.journalEntries;
-      if(d.srData)     srData = d.srData;
-      if(d.flashcards) flashcards = d.flashcards;
-      if(d.heatData)   heatData = d.heatData;
-      if(d.xp !== undefined) xp = d.xp;
-      if(d.level !== undefined) level = d.level;
-      if(d.unlockedThemes) unlockedThemes = d.unlockedThemes;
-      if(d.earnedBadges) earnedBadges = new Set(d.earnedBadges);
-      // ⛔ Ne pas importer : currentUser, uid, token, authState
-
-      nid = safeMaxId(subjects.map(s=>s.id), blocks.map(b=>b.id));
-      
-      // ✅ Rendre d'abord, sauvegarder ensuite (avec délai)
-      renderPlanning(); renderExams(); updateXPBar();
-      showToast('✅ Import réussi !');
-      
-      setTimeout(() => scheduleSave(), 500); // ← délai pour éviter le conflit
-      
-    } catch(ex) { showToast('❌ Fichier invalide.'); }
-  };
-  reader.readAsText(file);
-  evt.target.value = '';
-}
+function importJSON(evt){ const file=evt.target.files[0];if(!file)return; const reader=new FileReader(); reader.onload=e=>{ try{ const d=JSON.parse(e.target.result); if(d.subjects)subjects=d.subjects;if(d.blocks)blocks=d.blocks; if(d.journalEntries)journalEntries=d.journalEntries;if(d.srData)srData=d.srData; if(d.flashcards)flashcards=d.flashcards;if(d.heatData)heatData=d.heatData; if(d.xp!==undefined)xp=d.xp;if(d.level!==undefined)level=d.level; if(d.unlockedThemes)unlockedThemes=d.unlockedThemes; if(d.earnedBadges)earnedBadges=new Set(d.earnedBadges); nid=safeMaxId(subjects.map(s=>s.id),blocks.map(b=>b.id)); scheduleSave();renderPlanning();renderExams();updateXPBar();showToast('✅ Import réussi !'); }catch(ex){showToast('❌ Fichier invalide.');} }; reader.readAsText(file);evt.target.value=''; }
 
 function setContactType(t,btn){currentContactType=t;document.querySelectorAll('.contact-type-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');}
 async function sendContact(){ const name=document.getElementById('ct-name').value.trim(); const msg=document.getElementById('ct-msg').value.trim(); if(!name||!msg){showToast('Remplis ton prénom et ton message.');return;} showToast('✅ Message envoyé ! Merci '+name+' 🙏'); document.getElementById('ct-name').value='';document.getElementById('ct-msg').value='';document.getElementById('ct-email').value=''; }
@@ -3533,5 +3513,9 @@ Object.assign(window, {
   openDelSubjFromEdit, deleteSREntry, renderRenameSwatches,
 });
 </script>
+<div id="ctx-subj-menu" style="display:none;position:fixed;z-index:9999;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 4px 16px rgba(0,0,0,.2);min-width:160px;overflow:hidden">
+  <div id="ctx-btn-rename" style="padding:10px 14px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;gap:8px">✏️ Modifier</div>
+  <div id="ctx-btn-del" style="padding:10px 14px;cursor:pointer;font-size:.85rem;color:var(--danger-text);display:flex;align-items:center;gap:8px">🗑 Supprimer</div>
+</div>
 </body>
 </html>
