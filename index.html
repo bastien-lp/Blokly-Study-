@@ -482,6 +482,146 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   .land-hero{padding:2.5rem 1rem 2rem}
   .land-nav{padding:.9rem 1rem}
 }
+
+/* ── TUTO MODAL ── */
+.tuto-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--blue);
+  background: transparent;
+  color: var(--blue);
+  font-size: .72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  opacity: .75;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+.tuto-btn:hover {
+  background: var(--info-bg);
+  opacity: 1;
+}
+
+#modal-tuto .modal {
+  width: 560px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+.tuto-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.tuto-mascotte {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 12px;
+}
+
+.tuto-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.tuto-subtitle {
+  font-size: .78rem;
+  color: var(--blue);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.tuto-intro {
+  font-size: .8rem;
+  color: var(--text2);
+  line-height: 1.6;
+}
+.tuto-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+.tuto-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--bg2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  border-left: 3px solid var(--blue);
+}
+.tuto-step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tuto-step-title {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.tuto-step-text {
+  font-size: .78rem;
+  color: var(--text2);
+  line-height: 1.6;
+}
+.tuto-tip {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--warn-bg);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: .78rem;
+  color: var(--warn-text);
+  line-height: 1.6;
+  margin-top: 4px;
+}
+.tuto-tip-ico {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.tuto-success {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--success-bg);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: .78rem;
+  color: var(--success-text);
+  line-height: 1.6;
+  margin-top: 4px;
+}
+.tuto-label {
+  font-size: .68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text3);
+  margin: 14px 0 6px;
+}
+
 </style>
 <!-- SEO -->
 <meta name="description" content="Blokly Study — Planifie ton blocus, révise intelligemment avec flashcards, timer focus et révisions espacées. L'outil étudiant tout-en-un.">
@@ -758,6 +898,10 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   <!-- PLANNING -->
   <div id="page-planning" class="page active">
     <div class="card" style="padding:1rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+  <div style="font-size:.82rem;font-weight:600;color:var(--text)">📅 Planning de révision</div>
+  <button class="tuto-btn" onclick="openTuto('planning')">❓ Tuto</button>
+</div>
       <div class="view-row">
         <div style="display:flex;gap:5px">
           <button class="vtab active" id="vt-week" onclick="setView('week')">Semaine</button>
@@ -805,15 +949,24 @@ button.danger-btn:hover{background:var(--red);color:#fff}
     </div>
   </div>
 
-  <div id="page-agenda" class="page"><div class="card"><div class="section-title">Prochains blocs à venir</div><div id="agenda-list"></div></div></div>
+  <div id="page-agenda" class="page"><div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+  <div class="section-title" style="margin:0">Prochains blocs à venir</div>
+  <button class="tuto-btn" onclick="openTuto('agenda')">❓ Tuto</button>
+</div><div id="agenda-list"></div></div></div>
 
   <div id="page-progress" class="page">
-    <div class="card"><div class="section-title">Blocs de révision</div><div id="progress-list"></div></div>
+    <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+  <div class="section-title" style="margin:0">Blocs de révision</div>
+  <button class="tuto-btn" onclick="openTuto('progress')">❓ Tuto</button>
+</div><div id="progress-list"></div></div>
     <div class="card"><div class="section-title">Évolution par matière</div><div class="chart-wrap"><div class="chart-bars" id="prog-chart"></div></div></div>
   </div>
 
   <div id="page-confidence" class="page">
-    <div class="card"><div class="section-title">Confiance par chapitre ⭐</div><div style="font-size:.82rem;color:var(--text3);margin-bottom:1rem">Note ta maîtrise de 1 à 5 étoiles par chapitre.</div><div class="conf-grid" id="conf-grid"></div></div>
+    <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+  <div class="section-title" style="margin:0">Confiance par chapitre ⭐</div>
+  <button class="tuto-btn" onclick="openTuto('confidence')">❓ Tuto</button>
+</div><div style="font-size:.82rem;color:var(--text3);margin-bottom:1rem">Note ta maîtrise de 1 à 5 étoiles par chapitre.</div><div class="conf-grid" id="conf-grid"></div></div>
     <div class="card"><div class="section-title">Prédiction de réussite</div><div id="predict-list"></div></div>
   </div>
 
@@ -834,7 +987,10 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 
   <div id="page-flashcards" class="page">
     <div class="card">
-      <div class="section-title">🃏 Flashcards par chapitre</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+  <div class="section-title" style="margin:0">🃏 Flashcards par chapitre</div>
+  <button class="tuto-btn" onclick="openTuto('flashcards')">❓ Tuto</button>
+</div>
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
         <select id="fc-subj" onchange="fcLoadChaps()" style="font-size:.82rem;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text)"></select>
         <select id="fc-chap" onchange="renderFCList()" style="font-size:.82rem;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text)"></select>
@@ -872,7 +1028,10 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 
   <div id="page-repetition" class="page">
     <div class="card">
-      <div class="section-title">🔁 Révisions espacées (J1 · J7 · J30)</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+  <div class="section-title" style="margin:0">🔁 Révisions espacées (J1 · J7 · J30)</div>
+  <button class="tuto-btn" onclick="openTuto('repetition')">❓ Tuto</button>
+</div>
       <div style="font-size:.82rem;color:var(--text3);margin-bottom:1rem;line-height:1.7">Revoir un chapitre après 1j, 7j, 30j ancre l'information en mémoire longue durée.</div>
       <div id="sr-list"></div>
     </div>
@@ -887,13 +1046,19 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   </div>
 
   <div id="page-exams" class="page">
-    <div class="card"><div class="section-title">Temps restant avant les examens</div><div class="eg" id="exam-countdown"></div></div>
+    <div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+  <div class="section-title" style="margin:0">Temps restant avant les examens</div>
+  <button class="tuto-btn" onclick="openTuto('exams')">❓ Tuto</button>
+</div><div class="eg" id="exam-countdown"></div></div>
     <div class="card"><div class="section-title">Alerte surcharge</div><div style="font-size:.78rem;color:var(--text3);margin-bottom:8px">Charge quotidienne</div><div class="overload-bar" id="overload-bar2"></div></div>
   </div>
 
   <div id="page-stats" class="page">
     <div class="card">
-      <div class="section-title">🎮 Niveau & XP</div>
+     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+  <div class="section-title" style="margin:0">🎮 Niveau & XP</div>
+  <button class="tuto-btn" onclick="openTuto('stats')">❓ Tuto</button>
+</div>
       <div id="xp-stats-display"></div>
       <div style="margin-top:.8rem;padding:10px 12px;background:var(--info-bg);border-radius:var(--radius-sm);font-size:.78rem;color:var(--info-text)">
         💡 L'XP se gagne uniquement via le <strong>chronomètre de focus</strong> (10 XP/min). Durée minimale : 5 min.
@@ -918,7 +1083,10 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 
   <div id="page-journal" class="page">
     <div class="card">
-      <div class="section-title">Nouvelle entrée</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+  <div class="section-title" style="margin:0">Nouvelle entrée</div>
+  <button class="tuto-btn" onclick="openTuto('journal')">❓ Tuto</button>
+</div>
       <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
         <select id="j-subj" style="flex:1;padding:7px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.82rem"></select>
         <div class="moodrow" style="flex-shrink:0;display:flex;gap:5px">
@@ -935,11 +1103,14 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   </div>
 
   <div id="page-whoarewe" class="page">
-    <div class="who-hero">
-      <div class="who-hero-title">Blokly Study</div>
-      <div class="who-hero-sub">L'outil qui transforme le chaos du blocus en planning maîtrisé</div>
-      <div class="who-hero-motto">« S'investir c'est réussir »</div>
-    </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+    <button class="tuto-btn" onclick="openTuto('whoarewe')">❓ Tuto</button>
+  </div>
+  <div class="who-hero">
+    <div class="who-hero-title">Blokly Study</div>
+    <div class="who-hero-sub">L'outil qui transforme le chaos du blocus en planning maîtrisé</div>
+    <div class="who-hero-motto">« S'investir c'est réussir »</div>
+  </div>
     <div class="who-profile">
       <div class="who-avatar">BL</div>
       <div>
@@ -983,7 +1154,10 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   <!-- STUDY -->
   <div id="page-study" class="page">
     <div class="card">
-      <div class="study-top">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+  <div style="font-size:.82rem;font-weight:600;color:var(--text)">▶ Espace d'étude</div>
+  <button class="tuto-btn" onclick="openTuto('study')">❓ Tuto</button>
+</div>
         <label>Matière :</label>
         <select id="study-subj" onchange="updateStudySubj()"></select>
         <label>Mode :</label>
@@ -1299,6 +1473,24 @@ R: Fonction d'état H = U + PV"></textarea>
     <h3>⚡ Mode révision express</h3>
     <div id="express-list"></div>
     <div class="brow"><button class="ghost" onclick="closeModal('modal-express')">Fermer</button><button class="primary" onclick="applyExpress()">Appliquer</button></div>
+  </div>
+</div>
+
+<!-- MODAL TUTO DE SOSO -->
+<div class="modal-bg" id="modal-tuto">
+  <div class="modal">
+    <div class="tuto-header">
+      <img class="tuto-mascotte" id="tuto-mascotte-img" src="" alt="mascotte">
+      <div class="tuto-header-text">
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:3px">Les tutos de Soso</div>
+        <div class="tuto-title" id="tuto-modal-title"></div>
+        <div class="tuto-intro" id="tuto-modal-intro"></div>
+      </div>
+    </div>
+    <div id="tuto-modal-body"></div>
+    <div class="brow" style="margin-top:1.2rem">
+      <button class="primary" onclick="closeModal('modal-tuto')">J'ai compris ! 🚀</button>
+    </div>
   </div>
 </div>
 
@@ -1871,7 +2063,7 @@ function previewImport(){
   prevEl.style.display='block';
 }
 
-function confirmImport(){
+async function confirmImport(){
   const raw=document.getElementById('imp-text').value;
   if(!raw.trim()){showToast('Colle du texte d\'abord.');return;}
   const cards=parseImportText(raw);
@@ -1880,19 +2072,29 @@ function confirmImport(){
   const ci=parseInt(document.getElementById('imp-chap').value);
   const key=`${sid}_${ci}`;
   if(!flashcards[key]) flashcards[key]=[];
+  
+  // Ferme le modal D'ABORD avant tout traitement lourd
+  closeModal('modal-import-cards');
+  
+  // Petit délai pour laisser Firebase respirer
+  await new Promise(r => setTimeout(r, 100));
+  
   let added=0;
   cards.forEach(c=>{
-    // Éviter les doublons sur la question
     if(!flashcards[key].some(x=>x.q.toLowerCase()===c.q.toLowerCase())){
       flashcards[key].push({q:c.q,a:c.a,ok:undefined});
       added++;
     }
   });
-  closeModal('modal-import-cards');
+
   // Sync la page flashcards sur la bonne matière/chapitre
   const fcSubj=document.getElementById('fc-subj');
   if(fcSubj){fcSubj.value=sid;fcLoadChaps();document.getElementById('fc-chap').value=ci;renderFCList();}
+  
+  // Sauvegarde après un délai supplémentaire
+  await new Promise(r => setTimeout(r, 200));
   scheduleSave();
+  
   showToast(`✅ ${added} carte${added>1?'s':''} importée${added>1?'s':''} !`);
 }
 
@@ -2094,6 +2296,520 @@ function importJSON(evt){ const file=evt.target.files[0];if(!file)return; const 
 function setContactType(t,btn){currentContactType=t;document.querySelectorAll('.contact-type-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');}
 async function sendContact(){ const name=document.getElementById('ct-name').value.trim(); const msg=document.getElementById('ct-msg').value.trim(); if(!name||!msg){showToast('Remplis ton prénom et ton message.');return;} showToast('✅ Message envoyé ! Merci '+name+' 🙏'); document.getElementById('ct-name').value='';document.getElementById('ct-msg').value='';document.getElementById('ct-email').value=''; }
 
+// ── TUTOS DE SOSO ──
+const TUTO_DATA = {
+
+  planning: {
+    img: 'img/mascotte_calendrier.png',
+    title: '📅 Le Planning',
+    intro: 'Bienvenue dans le cœur de Blokly ! C\'est ici que tu organises toute ta période de révision de manière visuelle et intuitive.',
+    body: `
+      <div class="tuto-label">Comment ça marche ?</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Ajoute tes matières d'abord</div>
+            <div class="tuto-step-text">Clique sur le bouton <strong>+ Matière</strong> en haut à droite. Donne un nom, une couleur, une date d'examen et le nombre de chapitres. Chaque matière apparaîtra dans la colonne de gauche.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Glisse une matière dans le calendrier</div>
+            <div class="tuto-step-text">Attrape une matière dans la barre de gauche et fais-la glisser vers le créneau horaire de ton choix. Un bloc de 2h est créé automatiquement. Tu peux aussi glisser les <strong>pauses</strong> ☕ de la même façon !</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">3</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Navigue dans le temps</div>
+            <div class="tuto-step-text">Utilise les flèches <strong>← →</strong> pour changer de semaine. Passe en vue <strong>Mois</strong> pour avoir une vision globale de tout ton blocus. Le bouton 📍 te ramène toujours à aujourd'hui.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">4</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Marque un bloc comme effectué</div>
+            <div class="tuto-step-text"><strong>Double-clique</strong> sur un bloc pour le marquer comme fait — il devient semi-transparent. Clic droit (ou appui long sur mobile) pour plus d'options : modifier, déplacer, supprimer.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">5</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Templates & Express</div>
+            <div class="tuto-step-text">Le bouton <strong>📋 Templates</strong> te permet de sauvegarder une semaine type et de la réappliquer en un clic. Le bouton <strong>⚡</strong> génère automatiquement un planning basé sur tes dates d'examens.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-tip">
+        <div class="tuto-tip-ico">💡</div>
+        <div>La <strong>barre de charge</strong> en bas du calendrier indique si ta journée est légère 🟢, chargée 🟡 ou surchargée 🔴. Essaie de rester dans le vert !</div>
+      </div>
+      <div class="tuto-success" style="margin-top:8px">
+        <div>🎯</div>
+        <div>Les cases en <strong>jaune</strong> indiquent un jour d'examen. Ne planifie rien ce jour-là, repose-toi !</div>
+      </div>
+    `
+  },
+
+  agenda: {
+    img: 'img/mascotte_calendrier.png',
+    title: '📋 L\'Agenda',
+    intro: 'L\'agenda te montre tous tes blocs à venir dans l\'ordre chronologique. C\'est ta to-do list de révision !',
+    body: `
+      <div class="tuto-label">Comment l'utiliser ?</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Lis ta liste du jour</div>
+            <div class="tuto-step-text">Les blocs sont triés du plus proche au plus lointain. Tu vois d'un coup d'œil ce qu'il te reste à faire, avec la matière, l'heure et le contenu prévu.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Coche ce que tu as fait</div>
+            <div class="tuto-step-text">Clique sur le bouton <strong>✓</strong> vert à droite d'un bloc pour le marquer comme effectué. Il disparaît de la liste et ta progression se met à jour automatiquement.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-tip">
+        <div class="tuto-tip-ico">💡</div>
+        <div>Si ta liste est vide… soit tu es à jour, soit tu n'as pas encore planifié de blocs ! Retourne dans <strong>Planning</strong> pour en ajouter.</div>
+      </div>
+    `
+  },
+
+  progress: {
+    img: 'img/mascotte_trophee.png',
+    title: '📊 La Progression',
+    intro: 'Ici tu suis l\'avancement de tes révisions matière par matière. Une vue graphique pour rester motivé !',
+    body: `
+      <div class="tuto-label">Comprendre les indicateurs</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Les barres de progression</div>
+            <div class="tuto-step-text">Chaque barre représente une matière. Elle se remplit au fur et à mesure que tu marques des blocs comme effectués. Le pourcentage à droite te donne ton taux de complétion.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Les petits carrés colorés</div>
+            <div class="tuto-step-text">À droite de chaque barre, les petits carrés représentent tes blocs un par un. Les carrés <strong>foncés</strong> sont à faire, les carrés <strong>transparents</strong> sont faits.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">3</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Le graphique en barres</div>
+            <div class="tuto-step-text">Plus bas, le graphique compare visuellement toutes tes matières. La partie claire de chaque barre représente les blocs effectués. Idéal pour repérer les matières négligées !</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-tip">
+        <div class="tuto-tip-ico">💡</div>
+        <div>Si une matière est à <strong>0%</strong> à une semaine de l'examen, c'est le moment de s'y mettre sérieusement !</div>
+      </div>
+    `
+  },
+
+  confidence: {
+    img: 'img/mascotte_ampoule.png',
+    title: '⭐ La Confiance',
+    intro: 'Note ta maîtrise de chaque chapitre avec des étoiles. Blokly calcule ensuite une prédiction de réussite pour chaque matière !',
+    body: `
+      <div class="tuto-label">Comment noter ?</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Attribue des étoiles par chapitre</div>
+            <div class="tuto-step-text">Pour chaque chapitre, clique sur les étoiles de 1 à 5 pour noter ta confiance. <strong>1★</strong> = je ne comprends rien, <strong>5★</strong> = je maîtrise parfaitement.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Lis la moyenne de confiance</div>
+            <div class="tuto-step-text">En haut à droite de chaque carte matière, tu vois la moyenne de tes étoiles. En rouge si c'est faible, en orange si c'est moyen, en vert si c'est bon.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">3</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">La prédiction de réussite</div>
+            <div class="tuto-step-text">En bas de page, Blokly calcule un score de réussite basé sur tes blocs effectués, ta confiance et tes chapitres terminés. C'est une estimation — pas une garantie — mais c'est un bon indicateur !</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-tip">
+        <div class="tuto-tip-ico">💡</div>
+        <div>Sois <strong>honnête</strong> avec toi-même en notant. Mettre 5★ partout ne t'aidera pas à repérer les points faibles à retravailler avant l'examen !</div>
+      </div>
+    `
+  },
+
+  syntheses: {
+    img: 'img/mascotte_abc.png',
+    title: '📖 Les Synthèses',
+    intro: 'Suis l\'avancement de chaque chapitre de chaque matière. Tu peux ajouter des notes, changer le statut et voir ta progression globale en un clin d\'œil.',
+    body: `
+      <div class="tuto-label">Les statuts de chapitre</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Les trois statuts</div>
+            <div class="tuto-step-text">Chaque chapitre a un statut : <strong>⭕ Non commencé</strong>, <strong>📝 En cours</strong> ou <strong>✅ Terminé</strong>. Clique sur les boutons sous chaque chapitre pour le mettre à jour.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Ajoute des notes</div>
+            <div class="tuto-step-text">Clique sur le <strong>nom d'un chapitre</strong> pour l'éditer : tu peux renommer le chapitre et y ajouter un résumé ou des notes personnelles qui s'affichent directement sous le titre.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">3</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Filtre par statut</div>
+            <div class="tuto-step-text">Utilise les boutons <strong>Tous / Non commencés / En cours / Terminés</strong> pour filtrer l'affichage et te concentrer sur ce qui reste à faire.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">4</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Ajoute un chapitre</div>
+            <div class="tuto-step-text">En bas de chaque matière, le bouton <strong>＋ Chapitre</strong> te permet d'ajouter un chapitre supplémentaire si tu en as plus que prévu au départ.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-success" style="margin-top:4px">
+        <div>🃏</div>
+        <div>Le badge <strong>🃏 X</strong> à côté d'un chapitre indique combien de flashcards tu as créées pour ce chapitre. Pratique !</div>
+      </div>
+    `
+  },
+
+  flashcards: {
+    img: 'img/mascotte_abc.png',
+    title: '🃏 Les Flashcards',
+    intro: 'Crée des cartes question/réponse par chapitre et entraîne-toi avec le mode quiz. La méthode la plus efficace pour mémoriser !',
+    body: `
+      <div class="tuto-label">Créer et utiliser ses cartes</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Crée une carte manuellement</div>
+            <div class="tuto-step-text">Sélectionne une matière et un chapitre, puis clique sur <strong>+ Carte</strong>. Écris ta question au recto et la réponse au verso. Simple et rapide !</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Importe depuis une IA 🤖</div>
+            <div class="tuto-step-text">Clique sur <strong>📥 Importer</strong>. Copie le prompt fourni, envoie-le à ChatGPT ou Claude avec ton cours, puis colle le résultat. Blokly détecte automatiquement toutes les cartes !</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">3</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Lance le mode quiz</div>
+            <div class="tuto-step-text">Clique sur <strong>▶ Mode quiz</strong>. Les cartes s'affichent une à une. Clique sur la carte pour révéler la réponse, puis indique si tu as <strong>✓ Maîtrisé</strong> ou <strong>✗ À revoir</strong>.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">4</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Suis ta maîtrise</div>
+            <div class="tuto-step-text">Les cartes sont taguées <strong>Maîtrisé ✅</strong>, <strong>À revoir 🔄</strong> ou <strong>Nouveau 🆕</strong>. Concentre-toi sur les cartes "à revoir" avant ton exam !</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-tip">
+        <div class="tuto-tip-ico">💡</div>
+        <div>Fais le quiz <strong>plusieurs jours de suite</strong> sur les mêmes cartes. La répétition espacée, c'est la clé de la mémorisation à long terme !</div>
+      </div>
+    `
+  },
+
+  repetition: {
+    img: 'img/mascotte_horloge.png',
+    title: '🔁 Les Révisions Espacées',
+    intro: 'Le système J1·J7·J30 te rappelle quand revoir chaque chapitre pour ancrer l\'information en mémoire longue durée. C\'est de la science !',
+    body: `
+      <div class="tuto-label">Le principe</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Marque un chapitre comme étudié</div>
+            <div class="tuto-step-text">En bas de page, sélectionne une matière et un chapitre, puis clique sur <strong>📌 Marquer étudié</strong>. Blokly note la date et programme automatiquement 3 révisions.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Les 3 révisions programmées</div>
+            <div class="tuto-step-text">Après la première étude, tu dois revoir le chapitre à <strong>J+1</strong> (lendemain), puis <strong>J+7</strong> (une semaine), puis <strong>J+30</strong> (un mois). Chaque révision renforce la mémorisation.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">3</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Valide une révision</div>
+            <div class="tuto-step-text">Quand un chapitre est <strong>dû aujourd'hui</strong>, un bouton <strong>✓</strong> apparaît. Clique dessus après avoir révisé pour valider et programmer la prochaine échéance.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-tip">
+        <div class="tuto-tip-ico">⏰</div>
+        <div>Un point <strong>orange ⏰</strong> apparaît dans les Synthèses et sur le Planning quand une révision espacée est due. Ne l'ignore pas !</div>
+      </div>
+      <div class="tuto-success" style="margin-top:8px">
+        <div>🧠</div>
+        <div>Des études montrent que revoir un contenu à intervalles croissants permet de retenir jusqu'à <strong>80% de l'information</strong> sur le long terme. Ça vaut le coup !</div>
+      </div>
+    `
+  },
+
+  exams: {
+    img: 'img/mascotte_alerte.png',
+    title: '🎓 Les Examens',
+    intro: 'Un tableau de bord pour voir le temps restant avant chaque examen et surveiller ta charge de travail quotidienne.',
+    body: `
+      <div class="tuto-label">Lire le tableau</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Le compte à rebours</div>
+            <div class="tuto-step-text">Chaque carte affiche le nombre de jours restants avant l'examen. <strong>Rouge</strong> = moins de 7 jours, <strong>orange</strong> = moins de 14 jours, <strong>vert</strong> = tu as le temps.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">La mini barre de progression</div>
+            <div class="tuto-step-text">Sous chaque compte à rebours, une barre colorée montre le ratio blocs effectués / blocs prévus pour cette matière. Vise 100% avant le jour J !</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">3</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Renommer ou supprimer une matière</div>
+            <div class="tuto-step-text">Sur chaque carte, le bouton <strong>✏️</strong> permet de renommer la matière et le bouton <strong>✕</strong> de la supprimer définitivement avec tous ses blocs associés.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">4</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">L'alerte surcharge</div>
+            <div class="tuto-step-text">La barre en bas de page affiche la charge quotidienne de la semaine actuelle. Si une journée est en <strong>rouge</strong>, tu as trop de blocs ce jour-là — rééquilibre ton planning !</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-tip">
+        <div class="tuto-tip-ico">💡</div>
+        <div>Pense à renseigner la <strong>date d'examen</strong> quand tu crées une matière. Sans date, le compte à rebours ne s'affiche pas !</div>
+      </div>
+    `
+  },
+
+  stats: {
+    img: 'img/mascotte_trophee.png',
+    title: '📈 Les Statistiques',
+    intro: 'Ton tableau de bord complet : niveau XP, badges, répartition des blocs, activité des 4 dernières semaines et bien plus !',
+    body: `
+      <div class="tuto-label">Ce que tu trouveras ici</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Niveau & XP</div>
+            <div class="tuto-step-text">Tu gagnes <strong>10 XP par minute</strong> de focus (minimum 5 min de session). Monte de niveau pour débloquer des thèmes visuels exclusifs comme la Forêt 🌲, l'Océan 🌊 ou le Cyberpunk 🤖 !</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Les thèmes débloqués</div>
+            <div class="tuto-step-text">Clique sur un thème débloqué pour changer l'apparence de toute l'application. Les thèmes verrouillés 🔒 indiquent le niveau requis pour les obtenir.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">3</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Le graphique camembert</div>
+            <div class="tuto-step-text">Il montre la répartition de tes blocs de révision entre toutes tes matières. Si une matière prend 80% du camembert, c'est peut-être que les autres sont négligées !</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">4</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Les badges</div>
+            <div class="tuto-step-text">Des badges se débloquent en accomplissant des actions : premier bloc effectué, streak de 7 jours, 10 flashcards créées... Essaie de tous les collecter ! Certains rapportent même des <strong>XP bonus</strong> 🎁</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">5</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">La heatmap d'activité</div>
+            <div class="tuto-step-text">La grille colorée montre ton activité sur les 4 dernières semaines. Plus la case est foncée, plus tu as travaillé ce jour-là. L'objectif : avoir un maximum de cases bleues !</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-tip">
+        <div class="tuto-tip-ico">💡</div>
+        <div>La section <strong>👥 Blokly en ce moment</strong> te montre combien d'autres étudiants utilisent l'app en temps réel. Tu n'es pas seul dans ton blocus !</div>
+      </div>
+    `
+  },
+
+  journal: {
+    img: 'img/mascotte_pointing.png',
+    title: '📓 Le Journal',
+    intro: 'Note tes ressentis après chaque séance de révision. C\'est un outil de recul sur ton travail, et ça aide vraiment à rester motivé !',
+    body: `
+      <div class="tuto-label">Écrire une entrée</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Choisis une matière et une humeur</div>
+            <div class="tuto-step-text">Sélectionne la matière que tu viens de réviser, puis ton humeur du moment : 😴 épuisé, 😐 neutre, 🙂 bien, 🔥 en feu. Sois honnête !</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Écris ce que tu veux</div>
+            <div class="tuto-step-text">Quelques lignes suffisent : ce que tu as compris, ce qui était difficile, comment tu te sens. Clique sur <strong>Enregistrer</strong> et l'entrée s'ajoute à ton journal.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">3</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Relis tes entrées</div>
+            <div class="tuto-step-text">Tes entrées précédentes s'affichent en dessous, les plus récentes en premier. La couleur de la bordure correspond à la matière concernée.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-tip">
+        <div class="tuto-tip-ico">💡</div>
+        <div>Prendre 2 minutes pour écrire après une séance aide à <strong>consolider ce qu'on vient d'apprendre</strong>. C'est une technique de mémorisation à part entière !</div>
+      </div>
+    `
+  },
+
+  study: {
+    img: 'img/mascotte_horloge.png',
+    title: '▶ L\'Espace d\'Étude',
+    intro: 'Lance un chronomètre de focus, gagne de l\'XP, ambiance sonore... Tout ce qu\'il faut pour une séance de révision optimale !',
+    body: `
+      <div class="tuto-label">Démarrer une séance</div>
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">1</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Choisis ta matière et ton mode</div>
+            <div class="tuto-step-text">Sélectionne la matière que tu vas réviser. Choisis ensuite le mode : <strong>Durée libre</strong> (tu choisis la durée), <strong>Pomodoro 25/5</strong> (25 min travail + 5 min pause) ou <strong>Pomodoro 50/10</strong>.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">2</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Lance le timer</div>
+            <div class="tuto-step-text">Clique sur <strong>▶ Démarrer</strong>. Le cercle se vide au fur et à mesure. Tu peux mettre en pause à tout moment. L'XP potentiel est affiché avant de commencer — ça motive !</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">3</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Active le mode Focus 🎯</div>
+            <div class="tuto-step-text">Le bouton <strong>🎯 Focus</strong> passe en plein écran avec juste le timer. Idéal pour éliminer les distractions. Appuie sur <strong>Échap</strong> pour revenir à l'interface normale.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">4</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Choisis une ambiance sonore</div>
+            <div class="tuto-step-text">🌧️ Pluie, 🌊 Océan, 🔥 Feu, 🌿 Forêt ou 🧠 Alpha (ondes binaurales). Ajuste le volume avec le slider. Ces sons sont générés en temps réel, pas de streaming nécessaire !</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">5</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Gagne de l'XP</div>
+            <div class="tuto-step-text">Tu gagnes <strong>10 XP par minute</strong> de focus, mais seulement si ta séance dure <strong>au moins 5 minutes</strong>. Plus ta séance est longue, plus tu gagnes d'XP et plus tu montes vite de niveau !</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-tip">
+        <div class="tuto-tip-ico">💡</div>
+        <div>La bulle flottante en bas à droite reste visible quand tu navigues dans d'autres onglets. Tu ne perdras pas le fil de ta séance !</div>
+      </div>
+      <div class="tuto-success" style="margin-top:8px">
+        <div>🔥</div>
+        <div>Travaille <strong>plusieurs jours de suite</strong> pour augmenter ton streak. Plus ton streak est élevé, plus tu débloques de badges !</div>
+      </div>
+    `
+  },
+
+  whoarewe: {
+    img: 'img/mascotte_thumbsup.png',
+    title: 'ℹ️ À propos de Blokly',
+    intro: 'Tout ce que tu dois savoir sur Blokly Study, son créateur et comment nous contacter !',
+    body: `
+      <div class="tuto-steps">
+        <div class="tuto-step">
+          <div class="tuto-step-num">👨‍💻</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Qui a créé Blokly ?</div>
+            <div class="tuto-step-text">Blokly a été conçu par <strong>Bastien Leprince</strong>, étudiant ingénieur à HelMo Gramme (Liège, Belgique). L'idée est née d'un vrai problème : une organisation catastrophique pendant les blocus !</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">💬</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Tu as une suggestion ou un bug ?</div>
+            <div class="tuto-step-text">Utilise le formulaire de contact en bas de cette page. Choisis le type de message (suggestion, bug ou avis), remplis ton prénom et ton message, et envoie ! Chaque retour compte pour améliorer Blokly.</div>
+          </div>
+        </div>
+        <div class="tuto-step">
+          <div class="tuto-step-num">☁️</div>
+          <div class="tuto-step-content">
+            <div class="tuto-step-title">Mes données sont-elles sauvegardées ?</div>
+            <div class="tuto-step-text">Oui ! Tout est synchronisé automatiquement dans le cloud via Firebase. Tu peux retrouver ton planning sur n'importe quel appareil en te connectant à ton compte. Le point vert en haut confirme la sync.</div>
+          </div>
+        </div>
+      </div>
+      <div class="tuto-success" style="margin-top:4px">
+        <div>📦</div>
+        <div>Tu peux aussi <strong>exporter</strong> toutes tes données en JSON (bouton 📦 en haut) et les <strong>réimporter</strong> à tout moment (bouton 📥). Pratique pour faire une sauvegarde manuelle !</div>
+      </div>
+    `
+  }
+
+};
+
+function openTuto(page) {
+  const data = TUTO_DATA[page];
+  if (!data) return;
+  document.getElementById('tuto-mascotte-img').src = data.img;
+  document.getElementById('tuto-modal-title').textContent = data.title;
+  document.getElementById('tuto-modal-intro').textContent = data.intro;
+  document.getElementById('tuto-modal-body').innerHTML = data.body;
+  openModal('modal-tuto');
+}
+
 Object.assign(window, {
   showLanding, showAuthPage,
   doLogin,doSignup,doLogout,doGoogleLogin,doForgotPassword,showAuthTab,
@@ -2119,6 +2835,7 @@ Object.assign(window, {
   openRenameSubj, confirmRenameSubj,
   goToToday,
   openImportCards, updateImpChap, previewImport, confirmImport,
+  openTuto,
 });
 </script>
 </body>
