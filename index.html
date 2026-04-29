@@ -890,7 +890,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 
   <!-- Nav -->
   <nav class="land-nav">
-    <div class="land-logo" id="dev-logo-trigger" onclick="handleDevLogoClick()">
+    <div class="land-logo" id="dev-logo-trigger">
       <div class="land-logo-blocks">
         <div class="land-logo-lb" style="width:28px;background:#E74C3C"></div>
         <div class="land-logo-lb" style="width:28px;background:#F1C40F;margin-left:4px"></div>
@@ -923,7 +923,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
     </div>
     <div id="pwa-install-zone" style="display:none;flex-direction:column;align-items:center;gap:8px;margin-bottom:10px">
   <div style="display:flex;align-items:center;gap:8px">
-    <button id="pwa-install-btn" onclick="triggerPWAInstall()" style="display:none;padding:11px 26px;border:1.5px solid rgba(255,255,255,.35);border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s">
+    <button id="pwa-install-btn" style="display:none;padding:11px 26px;border:1.5px solid rgba(255,255,255,.35);border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s">
       📲 Installer l'app sur mon appareil
     </button>
     <div class="wip-badge" title="Fonctionnalité accessible mais encore en développement — des bugs sont possibles">
@@ -931,7 +931,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <button id="pwa-ios-btn" onclick="showIOSInstallModal()" style="display:none;padding:11px 26px;border:1.5px solid rgba(255,255,255,.35);border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s">
+    <button id="pwa-ios-btn" style="display:none;padding:11px 26px;border:1.5px solid rgba(255,255,255,.35);border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s">
       📲 Installer sur iPhone / iPad
     </button>
     <div class="wip-badge" title="Fonctionnalité accessible mais encore en développement — des bugs sont possibles">
@@ -946,7 +946,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   <div style="background:#1a1a2e;border-radius:20px 20px 0 0;padding:2rem 1.5rem 2.5rem;max-width:500px;width:100%;border-top:1px solid rgba(255,255,255,.1)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
       <div style="font-size:1rem;font-weight:700;color:#fff">Installer Blokly sur iPhone</div>
-      <button onclick="hideIOSInstallModal()" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      <button id="ios-modal-close" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:1rem">
       <div style="display:flex;align-items:center;gap:14px">
@@ -3565,22 +3565,74 @@ function closeAlarm(){
   document.getElementById('alarm-overlay').classList.remove('show');
 }
 
-// ── DEV MENU ──
+// ── DEV MENU + PWA ──
 let _devClicks = 0, _devTimer = null;
-function handleDevLogoClick() {
-  _devClicks++;
-  clearTimeout(_devTimer);
-  _devTimer = setTimeout(() => { _devClicks = 0; }, 800);
-  if (_devClicks >= 3) {
-    _devClicks = 0;
-    document.getElementById('dev-code-input').value = '';
-    document.getElementById('dev-code-err').style.display = 'none';
-    document.getElementById('dev-login-panel').style.display = 'block';
-    document.getElementById('dev-panel').style.display = 'none';
-    document.getElementById('dev-modal').style.display = 'flex';
-    setTimeout(() => document.getElementById('dev-code-input').focus(), 100);
-  }
+let _pwaPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  const zone = document.getElementById('pwa-install-zone');
+  const btn = document.getElementById('pwa-install-btn');
+  if (zone) zone.style.display = 'flex';
+  if (btn) btn.style.display = 'inline-block';
+});
+
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+if (isIOS && isSafari && !isStandalone) {
+  const zone = document.getElementById('pwa-install-zone');
+  const btn = document.getElementById('pwa-ios-btn');
+  if (zone) zone.style.display = 'flex';
+  if (btn) btn.style.display = 'inline-block';
 }
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const logoTrigger = document.getElementById('dev-logo-trigger');
+  if (logoTrigger) {
+    logoTrigger.addEventListener('click', () => {
+      _devClicks++;
+      clearTimeout(_devTimer);
+      _devTimer = setTimeout(() => { _devClicks = 0; }, 800);
+      if (_devClicks >= 3) {
+        _devClicks = 0;
+        document.getElementById('dev-code-input').value = '';
+        document.getElementById('dev-code-err').style.display = 'none';
+        document.getElementById('dev-login-panel').style.display = 'block';
+        document.getElementById('dev-panel').style.display = 'none';
+        document.getElementById('dev-modal').style.display = 'flex';
+        setTimeout(() => document.getElementById('dev-code-input').focus(), 100);
+      }
+    });
+  }
+  document.getElementById('dev-close-btn')?.addEventListener('click', closeDevModal);
+  document.getElementById('dev-submit-btn')?.addEventListener('click', checkDevCode);
+  document.getElementById('dev-code-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') checkDevCode(); });
+  document.getElementById('dev-btn-themes')?.addEventListener('click', devUnlockAll);
+  document.getElementById('dev-btn-xp')?.addEventListener('click', devMaxXP);
+  document.getElementById('dev-btn-badges')?.addEventListener('click', devUnlockBadges);
+  document.getElementById('dev-btn-reset')?.addEventListener('click', devResetAll);
+  document.getElementById('pwa-install-btn')?.addEventListener('click', () => {
+    if (!_pwaPrompt) return;
+    _pwaPrompt.prompt();
+    _pwaPrompt.userChoice.then(() => { _pwaPrompt = null; });
+  });
+  document.getElementById('pwa-ios-btn')?.addEventListener('click', () => {
+    const m = document.getElementById('ios-install-modal');
+    if (m) m.style.display = 'flex';
+  });
+  document.getElementById('ios-modal-close')?.addEventListener('click', () => {
+    const m = document.getElementById('ios-install-modal');
+    if (m) m.style.display = 'none';
+  });
+});
+
+function handleDevLogoClick() {}
 
 function checkDevCode() {
   const val = document.getElementById('dev-code-input').value.trim();
@@ -3668,55 +3720,11 @@ Object.assign(window, {
   markReviewed,
   startPomoBreak, skipPomoBreak, closeAlarm,
   openDelSubjFromEdit, deleteSREntry, renderRenameSwatches,
-  showIOSInstallModal, hideIOSInstallModal,
   handleDevLogoClick, checkDevCode, closeDevModal,
-devUnlockAll, devMaxXP, devUnlockBadges, devResetAll,
+  devUnlockAll, devMaxXP, devUnlockBadges, devResetAll,
 });
 
-// PWA — Service Worker & bouton install
-let _pwaPrompt = null;
 
-// Android/Chrome : bouton install natif
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  _pwaPrompt = e;
-  const zone = document.getElementById('pwa-install-zone');
-  const btn = document.getElementById('pwa-install-btn');
-  if (zone) zone.style.display = 'flex';
-  if (btn) btn.style.display = 'inline-block';
-});
-
-function triggerPWAInstall() {
-  if (!_pwaPrompt) return;
-  _pwaPrompt.prompt();
-  _pwaPrompt.userChoice.then(() => { _pwaPrompt = null; });
-}
-
-// iOS Safari : bouton manuel
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-
-if (isIOS && isSafari && !isStandalone) {
-  const zone = document.getElementById('pwa-install-zone');
-  const btn = document.getElementById('pwa-ios-btn');
-  if (zone) zone.style.display = 'flex';
-  if (btn) btn.style.display = 'inline-block';
-}
-
-function showIOSInstallModal() {
-  const m = document.getElementById('ios-install-modal');
-  if (m) m.style.display = 'flex';
-}
-function hideIOSInstallModal() {
-  const m = document.getElementById('ios-install-modal');
-  if (m) m.style.display = 'none';
-}
-
-// Enregistrement Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
-}
 
 </script>
 <div id="ctx-subj-menu" style="display:none;position:fixed;z-index:9999;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 4px 16px rgba(0,0,0,.2);min-width:160px;overflow:hidden">
@@ -3729,15 +3737,14 @@ if ('serviceWorker' in navigator) {
   <div style="background:#0f0f1a;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:2rem;width:340px;max-width:90vw">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
       <div style="font-size:.7rem;letter-spacing:.2em;color:rgba(255,255,255,.3);text-transform:uppercase">Accès développeur</div>
-      <button onclick="closeDevModal()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:.9rem">✕</button>
+      <button id="dev-close-btn" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:.9rem">✕</button>
     </div>
 
     <div id="dev-login-panel">
       <div style="font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:10px">Code d'accès</div>
       <input id="dev-code-input" type="password" maxlength="10" placeholder="••••••"
-        style="width:100%;padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:1rem;letter-spacing:.3em;text-align:center;margin-bottom:12px"
-        onkeydown="if(event.key==='Enter') checkDevCode()">
-      <button onclick="checkDevCode()"
+        style="width:100%;padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:1rem;letter-spacing:.3em;text-align:center;margin-bottom:12px">
+      <button id="dev-submit-btn"
         style="width:100%;padding:10px;background:#4A90D9;border:none;border-radius:8px;color:#fff;font-size:.88rem;font-weight:600;cursor:pointer">
         Accéder
       </button>
@@ -3750,19 +3757,19 @@ if ('serviceWorker' in navigator) {
       <div style="font-size:.75rem;color:#27AE60;margin-bottom:1.2rem;text-align:center;letter-spacing:.05em">✓ Accès autorisé</div>
 
       <div style="display:flex;flex-direction:column;gap:10px">
-        <button onclick="devUnlockAll()"
+        <button id="dev-btn-themes"
           style="padding:10px 14px;background:rgba(87,255,43,.08);border:1px solid rgba(87,255,43,.2);border-radius:8px;color:#57FF2B;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left">
           🎮 Débloquer tous les niveaux & thèmes
         </button>
-        <button onclick="devMaxXP()"
+        <button id="dev-btn-xp"
           style="padding:10px 14px;background:rgba(74,144,217,.08);border:1px solid rgba(74,144,217,.2);border-radius:8px;color:#4A90D9;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left">
           ⚡ XP max (niveau 30)
         </button>
-        <button onclick="devUnlockBadges()"
+        <button id="dev-btn-badges"
           style="padding:10px 14px;background:rgba(241,196,15,.08);border:1px solid rgba(241,196,15,.2);border-radius:8px;color:#F1C40F;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left">
           🏆 Débloquer tous les badges
         </button>
-        <button onclick="devResetAll()"
+        <button id="dev-btn-reset"
           style="padding:10px 14px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);border-radius:8px;color:#E74C3C;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left">
           🗑 Réinitialiser toutes les données
         </button>
