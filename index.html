@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="google-site-verification" content="vA7iMsWEZQ7sLSiQaLiBONPJCSmDyOAeTWyVCJtGwGI" />
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0f1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Blokly">
 <title>Blokly Study — Planifie tes examens gratuitement 🎓</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -64,6 +70,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .land-cta-secondary{padding:13px 28px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.85);font-size:1rem;font-weight:500;cursor:pointer;transition:all .15s}
 .land-cta-secondary:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35)}
 .land-hero-note{font-size:.75rem;color:rgba(255,255,255,.3)}
+
+.wip-badge{
+  font-size:.85rem;
+  cursor:help;
+  opacity:.7;
+  transition:opacity .2s, transform .2s;
+  position:relative;
+}
+.wip-badge:hover{
+  opacity:1;
+  transform:scale(1.2);
+}
+.wip-badge::after{
+  content:attr(title);
+  display:none;
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:calc(100% + 8px);
+  background:#1a1a2e;
+  color:rgba(255,255,255,.85);
+  font-size:.72rem;
+  padding:6px 10px;
+  border-radius:7px;
+  border:1px solid rgba(255,255,255,.12);
+  white-space:nowrap;
+  pointer-events:none;
+  z-index:999;
+}
+.wip-badge:hover::after{
+  display:block;
+}
 
 .land-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:3rem 2rem;max-width:1100px;margin:0 auto;width:100%}
 .land-feat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:1.5rem;transition:border-color .2s,background .2s}
@@ -852,7 +890,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 
   <!-- Nav -->
   <nav class="land-nav">
-    <div class="land-logo">
+    <div class="land-logo" id="dev-logo-trigger" onclick="handleDevLogoClick()">
       <div class="land-logo-blocks">
         <div class="land-logo-lb" style="width:28px;background:#E74C3C"></div>
         <div class="land-logo-lb" style="width:28px;background:#F1C40F;margin-left:4px"></div>
@@ -883,7 +921,52 @@ button.danger-btn:hover{background:var(--red);color:#fff}
       <button class="land-cta-main" onclick="showAuthPage('signup')">🚀 Créer mon compte gratuit</button>
       <button class="land-cta-secondary" onclick="showAuthPage('login')">Me connecter</button>
     </div>
-    <p class="land-hero-note">Gratuit · Pas de pub · Données sauvegardées dans le cloud ☁️</p>
+    <div id="pwa-install-zone" style="display:none;flex-direction:column;align-items:center;gap:8px;margin-bottom:10px">
+  <div style="display:flex;align-items:center;gap:8px">
+    <button id="pwa-install-btn" onclick="triggerPWAInstall()" style="display:none;padding:11px 26px;border:1.5px solid rgba(255,255,255,.35);border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s">
+      📲 Installer l'app sur mon appareil
+    </button>
+    <div class="wip-badge" title="Fonctionnalité accessible mais encore en développement — des bugs sont possibles">
+      🚧
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button id="pwa-ios-btn" onclick="showIOSInstallModal()" style="display:none;padding:11px 26px;border:1.5px solid rgba(255,255,255,.35);border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s">
+      📲 Installer sur iPhone / iPad
+    </button>
+    <div class="wip-badge" title="Fonctionnalité accessible mais encore en développement — des bugs sont possibles">
+      🚧
+    </div>
+  </div>
+</div>
+<p class="land-hero-note">Gratuit · Pas de pub · Données sauvegardées dans le cloud ☁️</p>
+
+<!-- Modal iOS -->
+<div id="ios-install-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);align-items:flex-end;justify-content:center">
+  <div style="background:#1a1a2e;border-radius:20px 20px 0 0;padding:2rem 1.5rem 2.5rem;max-width:500px;width:100%;border-top:1px solid rgba(255,255,255,.1)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <div style="font-size:1rem;font-weight:700;color:#fff">Installer Blokly sur iPhone</div>
+      <button onclick="hideIOSInstallModal()" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="background:#4A90D9;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">1</div>
+        <div style="color:rgba(255,255,255,.8);font-size:.88rem;line-height:1.5">Appuie sur le bouton <strong style="color:#fff">Partager</strong> en bas de Safari <span style="font-size:1.1rem">⬆️</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="background:#4A90D9;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">2</div>
+        <div style="color:rgba(255,255,255,.8);font-size:.88rem;line-height:1.5">Fais défiler et appuie sur <strong style="color:#fff">"Sur l'écran d'accueil"</strong> <span style="font-size:1.1rem">➕</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="background:#27AE60;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">✓</div>
+        <div style="color:rgba(255,255,255,.8);font-size:.88rem;line-height:1.5">Appuie sur <strong style="color:#fff">"Ajouter"</strong> en haut à droite — Blokly apparaît sur ton écran d'accueil !</div>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem;padding:10px 14px;background:rgba(74,144,217,.1);border:1px solid rgba(74,144,217,.2);border-radius:8px;font-size:.75rem;color:#93c5fd;text-align:center">
+      💡 Fonctionne uniquement avec Safari sur iPhone et iPad
+    </div>
+  </div>
+</div>
   </section>
 
   <!-- Features -->
@@ -3482,6 +3565,80 @@ function closeAlarm(){
   document.getElementById('alarm-overlay').classList.remove('show');
 }
 
+// ── DEV MENU ──
+let _devClicks = 0, _devTimer = null;
+function handleDevLogoClick() {
+  _devClicks++;
+  clearTimeout(_devTimer);
+  _devTimer = setTimeout(() => { _devClicks = 0; }, 800);
+  if (_devClicks >= 3) {
+    _devClicks = 0;
+    document.getElementById('dev-code-input').value = '';
+    document.getElementById('dev-code-err').style.display = 'none';
+    document.getElementById('dev-login-panel').style.display = 'block';
+    document.getElementById('dev-panel').style.display = 'none';
+    document.getElementById('dev-modal').style.display = 'flex';
+    setTimeout(() => document.getElementById('dev-code-input').focus(), 100);
+  }
+}
+
+function checkDevCode() {
+  const val = document.getElementById('dev-code-input').value.trim();
+  if (val === '220608') {
+    document.getElementById('dev-login-panel').style.display = 'none';
+    document.getElementById('dev-panel').style.display = 'block';
+    document.getElementById('dev-code-err').style.display = 'none';
+  } else {
+    document.getElementById('dev-code-err').style.display = 'block';
+    document.getElementById('dev-code-input').value = '';
+  }
+}
+
+function closeDevModal() {
+  document.getElementById('dev-modal').style.display = 'none';
+}
+
+function devShowMsg(msg) {
+  const el = document.getElementById('dev-action-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 2500);
+}
+
+function devUnlockAll() {
+  const ALL_THEMES = ['default','foret','cyberpunk','rose','ocean','sunset','aurora','gold','arctique','lave','minuit','retro','abyssal'];
+  unlockedThemes = [...ALL_THEMES];
+  if (typeof renderThemeButtons === 'function') renderThemeButtons();
+  scheduleSave();
+  devShowMsg('✓ Tous les thèmes débloqués !');
+}
+
+function devMaxXP() {
+  xp = 99999;
+  level = 30;
+  if (typeof updateXPBar === 'function') updateXPBar();
+  if (typeof renderThemeButtons === 'function') renderThemeButtons();
+  scheduleSave();
+  devShowMsg('✓ XP max appliqué !');
+}
+
+function devUnlockBadges() {
+  const ALL_BADGES = ['first_block','week_done','streak3','streak7','focus30','focus60','marathon','night_owl','early_bird','all_done','sniper','speed_run','perfectionist'];
+  ALL_BADGES.forEach(b => earnedBadges.add(b));
+  if (typeof renderBadges === 'function') renderBadges();
+  scheduleSave();
+  devShowMsg('✓ Tous les badges débloqués !');
+}
+
+function devResetAll() {
+  if (!confirm('Réinitialiser TOUTES les données ? Action irréversible.')) return;
+  resetAppState();
+  scheduleSave();
+  closeDevModal();
+  showToast('🗑 Données réinitialisées.');
+}
+
+
 Object.assign(window, {
   showLanding, showAuthPage,
   doLogin,doSignup,doLogout,doGoogleLogin,doForgotPassword,showAuthTab,
@@ -3511,11 +3668,114 @@ Object.assign(window, {
   markReviewed,
   startPomoBreak, skipPomoBreak, closeAlarm,
   openDelSubjFromEdit, deleteSREntry, renderRenameSwatches,
+  showIOSInstallModal, hideIOSInstallModal,
+  handleDevLogoClick, checkDevCode, closeDevModal,
+devUnlockAll, devMaxXP, devUnlockBadges, devResetAll,
 });
+
+// PWA — Service Worker & bouton install
+let _pwaPrompt = null;
+
+// Android/Chrome : bouton install natif
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  const zone = document.getElementById('pwa-install-zone');
+  const btn = document.getElementById('pwa-install-btn');
+  if (zone) zone.style.display = 'flex';
+  if (btn) btn.style.display = 'inline-block';
+});
+
+function triggerPWAInstall() {
+  if (!_pwaPrompt) return;
+  _pwaPrompt.prompt();
+  _pwaPrompt.userChoice.then(() => { _pwaPrompt = null; });
+}
+
+// iOS Safari : bouton manuel
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isSafari = /safari/i.test(navigator.userAgent) && !/chrome/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+
+if (isIOS && isSafari && !isStandalone) {
+  const zone = document.getElementById('pwa-install-zone');
+  const btn = document.getElementById('pwa-ios-btn');
+  if (zone) zone.style.display = 'flex';
+  if (btn) btn.style.display = 'inline-block';
+}
+
+function showIOSInstallModal() {
+  const m = document.getElementById('ios-install-modal');
+  if (m) m.style.display = 'flex';
+}
+function hideIOSInstallModal() {
+  const m = document.getElementById('ios-install-modal');
+  if (m) m.style.display = 'none';
+}
+
+// Enregistrement Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
 </script>
 <div id="ctx-subj-menu" style="display:none;position:fixed;z-index:9999;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 4px 16px rgba(0,0,0,.2);min-width:160px;overflow:hidden">
   <div id="ctx-btn-rename" style="padding:10px 14px;cursor:pointer;font-size:.85rem;display:flex;align-items:center;gap:8px">✏️ Modifier</div>
   <div id="ctx-btn-del" style="padding:10px 14px;cursor:pointer;font-size:.85rem;color:var(--danger-text);display:flex;align-items:center;gap:8px">🗑 Supprimer</div>
 </div>
+
+<!-- Modal Développeur -->
+<div id="dev-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.85);align-items:center;justify-content:center">
+  <div style="background:#0f0f1a;border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:2rem;width:340px;max-width:90vw">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <div style="font-size:.7rem;letter-spacing:.2em;color:rgba(255,255,255,.3);text-transform:uppercase">Accès développeur</div>
+      <button onclick="closeDevModal()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:.9rem">✕</button>
+    </div>
+
+    <div id="dev-login-panel">
+      <div style="font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:10px">Code d'accès</div>
+      <input id="dev-code-input" type="password" maxlength="10" placeholder="••••••"
+        style="width:100%;padding:10px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:1rem;letter-spacing:.3em;text-align:center;margin-bottom:12px"
+        onkeydown="if(event.key==='Enter') checkDevCode()">
+      <button onclick="checkDevCode()"
+        style="width:100%;padding:10px;background:#4A90D9;border:none;border-radius:8px;color:#fff;font-size:.88rem;font-weight:600;cursor:pointer">
+        Accéder
+      </button>
+      <div id="dev-code-err" style="color:#E74C3C;font-size:.75rem;text-align:center;margin-top:8px;display:none">
+        Code incorrect
+      </div>
+    </div>
+
+    <div id="dev-panel" style="display:none">
+      <div style="font-size:.75rem;color:#27AE60;margin-bottom:1.2rem;text-align:center;letter-spacing:.05em">✓ Accès autorisé</div>
+
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button onclick="devUnlockAll()"
+          style="padding:10px 14px;background:rgba(87,255,43,.08);border:1px solid rgba(87,255,43,.2);border-radius:8px;color:#57FF2B;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left">
+          🎮 Débloquer tous les niveaux & thèmes
+        </button>
+        <button onclick="devMaxXP()"
+          style="padding:10px 14px;background:rgba(74,144,217,.08);border:1px solid rgba(74,144,217,.2);border-radius:8px;color:#4A90D9;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left">
+          ⚡ XP max (niveau 30)
+        </button>
+        <button onclick="devUnlockBadges()"
+          style="padding:10px 14px;background:rgba(241,196,15,.08);border:1px solid rgba(241,196,15,.2);border-radius:8px;color:#F1C40F;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left">
+          🏆 Débloquer tous les badges
+        </button>
+        <button onclick="devResetAll()"
+          style="padding:10px 14px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);border-radius:8px;color:#E74C3C;font-size:.82rem;font-weight:600;cursor:pointer;text-align:left">
+          🗑 Réinitialiser toutes les données
+        </button>
+      </div>
+
+      <div id="dev-action-msg" style="margin-top:12px;font-size:.75rem;color:#27AE60;text-align:center;display:none"></div>
+
+      <div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.07);font-size:.65rem;color:rgba(255,255,255,.2);text-align:center">
+        Blokly Dev Tools — usage interne uniquement
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
