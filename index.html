@@ -71,6 +71,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .land-cta-secondary:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35)}
 .land-hero-note{font-size:.75rem;color:rgba(255,255,255,.3)}
 
+.lb-tab{padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .18s}
+.lb-tab:hover{background:var(--border);color:var(--text)}
+.lb-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
 .wip-badge{
   font-size:.85rem;
   cursor:help;
@@ -1034,6 +1038,18 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 <!-- ════════════════════
      LEVEL UP
      ════════════════════ -->
+
+<div id="pseudo-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:var(--card-bg);border-radius:var(--radius);padding:1.5rem;width:90%;max-width:360px;border:1px solid var(--border)">
+    <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:1rem">✏️ Modifier mon pseudo</div>
+    <input id="pseudo-input" type="text" maxlength="24" placeholder="Ton pseudo (max 24 caractères)" style="width:100%;padding:9px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.9rem;margin-bottom:1rem">
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="icon-btn" onclick="closePseudoModal()">Annuler</button>
+      <button class="primary" onclick="savePseudo()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <div id="levelup-overlay">
   <div class="levelup-text" id="levelup-text">LEVEL UP!</div>
   <div class="levelup-sub" id="levelup-sub">Niveau 2 atteint 🎉</div>
@@ -1139,9 +1155,10 @@ button.danger-btn:hover{background:var(--red);color:#fff}
       <button class="icon-btn" id="btn-undo" onclick="undo()" title="Annuler (Ctrl+Z)" disabled>↩</button>
       <button class="icon-btn" id="btn-redo" onclick="redo()" title="Rétablir (Ctrl+Y)" disabled>↪</button>
       <button class="icon-btn" onclick="printPlanning()" title="Imprimer le planning">🖨️</button>
-      <div class="user-chip">
+      <div class="user-chip" onclick="openPseudoModal()" title="Modifier mon pseudo" style="cursor:pointer">
         <div class="user-avatar" id="user-avatar">?</div>
         <span id="user-email-lbl">—</span>
+        <span style="font-size:.65rem;color:var(--text3)">✏️</span>
       </div>
       <button class="icon-btn" onclick="toggleDark()" id="dark-btn">🌙</button>
       <button class="icon-btn" onclick="exportJSON()" title="Exporter">📦</button>
@@ -1226,13 +1243,6 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   <div id="page-progress" class="page">
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-      <div class="section-title" style="margin:0">Prochains blocs à venir</div>
-      <button class="tuto-btn" onclick="openTuto('agenda')">❓ Tuto</button>
-    </div>
-    <div id="agenda-list"></div>
-  </div>
-  <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
       <div class="section-title" style="margin:0">Blocs de révision</div>
       <button class="tuto-btn" onclick="openTuto('progress')">❓ Tuto</button>
     </div>
@@ -1241,6 +1251,13 @@ button.danger-btn:hover{background:var(--red);color:#fff}
   <div class="card">
     <div class="section-title">Évolution par matière</div>
     <div class="chart-wrap"><div class="chart-bars" id="prog-chart"></div></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div class="section-title" style="margin:0">Prochains blocs à venir</div>
+      <button class="tuto-btn" onclick="openTuto('agenda')">❓ Tuto</button>
+    </div>
+    <div id="agenda-list"></div>
   </div>
 </div>
 
@@ -1356,9 +1373,18 @@ button.danger-btn:hover{background:var(--red);color:#fff}
     </div>
     <div class="card">
       <div class="section-title">👥 Blokly en ce moment</div>
-      <div id="presence-stats" style="font-size:.85rem;color:var(--text2)">Chargement…</div>
+      <div id="presence-stats" style="font-size:.85rem;color:var(--text2)"><div style="color:var(--text3)">Personne d'autre en ce moment.</div></div>
     </div>
     <div class="card"><div class="section-title">🏆 Badges & Jalons</div><div class="badges-grid" id="badges-grid"></div></div>
+    <div class="card">
+      <div class="section-title">🏅 Classement</div>
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <button class="lb-tab active" data-tab="alltime" onclick="renderLeaderboard('alltime')">🌐 Tout temps</button>
+        <button class="lb-tab" data-tab="week" onclick="renderLeaderboard('week')">📅 Cette semaine</button>
+        <button class="lb-tab" data-tab="today" onclick="renderLeaderboard('today')">☀️ Aujourd'hui</button>
+      </div>
+      <div id="leaderboard-list"><div style="text-align:center;padding:1rem;color:var(--text3);font-size:.85rem">Ouvre l'onglet pour charger.</div></div>
+    </div>
     <div class="card"><div class="section-title">Récapitulatif global</div><div id="weekly-recap"></div></div>
     <div class="card"><div class="section-title">Activité — 4 semaines</div><div id="heatmap-stats"></div></div>
   </div>
@@ -1803,7 +1829,7 @@ R: Fonction d'état H = U + PV"></textarea>
 import { initializeApp }                                      from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import { getAuth, createUserWithEmailAndPassword,
          signInWithEmailAndPassword, signOut,
-         sendPasswordResetEmail,
+         sendPasswordResetEmail, updateProfile,
          GoogleAuthProvider, signInWithPopup,
          onAuthStateChanged }                                 from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import { getFirestore, doc, setDoc, getDoc, collection,
@@ -1898,6 +1924,8 @@ let lpTimer=null;
 let obStep=0,obTotal=5;
 let confirmCallback=null;
 let xp=0,level=1,unlockedThemes=['default'],currentTheme='default';
+let xpToday=0,xpThisWeek=0,lastXPDateDay='',lastXPDateWeek='';
+let leaderboardTab='alltime';
 let presenceRef=null;
 let undoStack=[], redoStack=[];
 const UNDO_MAX=10;
@@ -1974,6 +2002,11 @@ if(d.totalFocusHours!==undefined)totalFocusHours=d.totalFocusHours;
 if(d.lastStudyDate)lastStudyDate=d.lastStudyDate;
 if(d.weekLongSessions!==undefined)weekLongSessions=d.weekLongSessions;
 if(d._totalSRValidated!==undefined)_totalSRValidated=d._totalSRValidated;
+if(d.xpToday!==undefined)xpToday=d.xpToday; if(d.xpThisWeek!==undefined)xpThisWeek=d.xpThisWeek;
+if(d.lastXPDateDay)lastXPDateDay=d.lastXPDateDay; if(d.lastXPDateWeek)lastXPDateWeek=d.lastXPDateWeek;
+const todayKey=new Date().toISOString().slice(0,10); const weekKey=getWeekKey();
+if(lastXPDateDay!==todayKey){xpToday=0;lastXPDateDay=todayKey;}
+if(lastXPDateWeek!==weekKey){xpThisWeek=0;lastXPDateWeek=weekKey;}
 return subjects.length>0||blocks.length>0; }catch(e){return false;} }
 
 function scheduleSave(){ saveToLS(); if(saveScheduled)return; saveScheduled=true; setTimeout(()=>{saveScheduled=false;saveToCloud();},3000); }
@@ -1982,6 +2015,7 @@ async function saveToCloud(){ if(!currentUser)return; setSyncState('syncing'); t
   streak,todaySess,todayMins,darkMode,nid,xp,level,unlockedThemes,currentTheme,
   earnedBadges:[...earnedBadges],
   totalFocusHours,lastStudyDate,weekLongSessions,_totalSRValidated,
+  xpToday,xpThisWeek,lastXPDateDay,lastXPDateWeek,
   updatedAt:new Date().toISOString()
 }); await saveTemplatesToCloud(); setSyncState('ok'); }catch(e){console.error('saveToCloud:',e);setSyncState('error');} }
 async function saveTemplatesToCloud(){ if(!currentUser)return; try{ await setDoc(doc(db,'users',currentUser.uid,'data','templates'),{savedTemplates,updatedAt:new Date().toISOString()}); }catch(e){} }
@@ -2022,6 +2056,7 @@ onAuthStateChanged(auth, async user => {
     if(autoSaveTimer){clearInterval(autoSaveTimer);autoSaveTimer=null;}
     autoSaveTimer=setInterval(()=>saveToCloud(),30000);
     setupPresence(); watchPresenceCount(); purgeOldBlocks();
+    if(!earnedBadges.has('welcome')){ earnedBadges.add('welcome'); addXP(50); showToast('👋 Badge "Bienvenue !" débloqué ! +50 XP'); scheduleSave(); }
     renderPlanning(); renderExams(); setJMood('🙂'); populateStudySubjects(); populateJournalSubjects(); updateUndoButtons();
   } else {
     currentUser=null; if(autoSaveTimer){clearInterval(autoSaveTimer);autoSaveTimer=null;} clearPresence(); resetAppState(); hideLoading();
@@ -2049,7 +2084,20 @@ function resetAppState(){
 }
 function purgeOldBlocks(){blocks=blocks.filter(b=>b.weekOffset>=-8&&b.weekOffset<=52);}
 
-function addXP(amount){ const prevLevel=level; xp+=amount; let newLevel=1; for(const l of XP_LEVELS){ if(xp>=l.xpNeeded) newLevel=l.level; } level=newLevel; for(const l of XP_LEVELS){ if(l.theme && xp>=l.xpNeeded && !unlockedThemes.includes(l.theme)){ unlockedThemes.push(l.theme); } } const flash=document.getElementById('xp-flash'); flash.classList.add('flash'); setTimeout(()=>flash.classList.remove('flash'),300); updateXPBar(); if(level>prevLevel){ showLevelUp(level); } scheduleSave(); }
+function addXP(amount){ const prevLevel=level; xp+=amount;
+  const todayKey=new Date().toISOString().slice(0,10);
+  const weekKey=getWeekKey();
+  if(lastXPDateDay!==todayKey){xpToday=0;lastXPDateDay=todayKey;}
+  if(lastXPDateWeek!==weekKey){xpThisWeek=0;lastXPDateWeek=weekKey;}
+  xpToday+=amount; xpThisWeek+=amount;
+  let newLevel=1; for(const l of XP_LEVELS){ if(xp>=l.xpNeeded) newLevel=l.level; } level=newLevel; for(const l of XP_LEVELS){ if(l.theme && xp>=l.xpNeeded && !unlockedThemes.includes(l.theme)){ unlockedThemes.push(l.theme); } } const flash=document.getElementById('xp-flash'); flash.classList.add('flash'); setTimeout(()=>flash.classList.remove('flash'),300); updateXPBar(); if(level>prevLevel){ showLevelUp(level); } scheduleSave();
+  pushLeaderboard();
+}
+function getWeekKey(){ const d=new Date(); const day=d.getDay()||7; d.setDate(d.getDate()-day+1); return d.toISOString().slice(0,10); }
+async function pushLeaderboard(){ if(!currentUser||!db)return; try{ const pseudo=currentUser.displayName||currentUser.email?.split('@')[0]||'Anonyme'; await setDoc(doc(db,'leaderboard',currentUser.uid),{ uid:currentUser.uid, pseudo, xp, xpToday, xpThisWeek, level, updatedAt:new Date().toISOString() }); }catch(e){} }
+async function renderLeaderboard(tab){ leaderboardTab=tab||leaderboardTab; const wrap=document.getElementById('leaderboard-list'); if(!wrap)return; wrap.innerHTML=`<div style="text-align:center;padding:1rem;color:var(--text3);font-size:.85rem">Chargement…</div>`; document.querySelectorAll('.lb-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===leaderboardTab)); try{ const snap=await getDocs(collection(db,'leaderboard')); const rows=[]; snap.forEach(d=>rows.push(d.data())); const sortKey=leaderboardTab==='today'?'xpToday':leaderboardTab==='week'?'xpThisWeek':'xp'; rows.sort((a,b)=>(b[sortKey]||0)-(a[sortKey]||0)); const top=rows.slice(0,20); const medals=['🥇','🥈','🥉']; wrap.innerHTML=top.length===0?`<div style="text-align:center;padding:1.5rem;color:var(--text3)">Aucun joueur pour l'instant.</div>`:top.map((r,i)=>{ const isMe=r.uid===currentUser?.uid; const xpVal=r[sortKey]||0; const medal=i<3?medals[i]:`<span style="font-size:.75rem;color:var(--text3)">#${i+1}</span>`; return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);background:${isMe?'rgba(74,144,217,.12)':'transparent'};border:${isMe?'1px solid rgba(74,144,217,.3)':'1px solid transparent'};margin-bottom:4px"><div style="width:28px;text-align:center;font-size:1.1rem">${medal}</div><div style="flex:1;min-width:0"><div style="font-size:.85rem;font-weight:${isMe?700:500};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${isMe?'⭐ ':''} ${escHtml(r.pseudo||'?')}</div><div style="font-size:.72rem;color:var(--text3)">Nv. ${r.level||1}</div></div><div style="font-size:.88rem;font-weight:700;color:var(--xp-color)">${xpVal.toLocaleString()} XP</div></div>`; }).join(''); }catch(e){ wrap.innerHTML=`<div style="text-align:center;padding:1rem;color:var(--text3)">Impossible de charger le classement.</div>`; } }
+function escHtml(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+window.renderLeaderboard = renderLeaderboard;
 function computeFocusXP(elapsedSecs){ if(elapsedSecs < XP_MIN_SECS) return 0; const mins = Math.floor(elapsedSecs / 60); return mins * XP_PER_MIN; }
 function updateXPBar(){
   const curDef=XP_LEVELS.find(l=>l.level===level)||XP_LEVELS[0];
@@ -2121,7 +2169,7 @@ window._setTheme=t=>{ applyTheme(t);renderThemeButtons();scheduleSave(); };
 async function setupPresence(){ if(!currentUser||!rtdb)return; try{ presenceRef=dbRef(rtdb,`presence/${currentUser.uid}`); }catch(e){} }
 function setPresenceActive(active){ if(!presenceRef||!currentUser)return; try{ if(active){dbSet(presenceRef,{uid:currentUser.uid,startedAt:Date.now()});onDisconnect(presenceRef).remove();}else{dbSet(presenceRef,null);} }catch(e){} }
 function clearPresence(){ if(presenceRef){try{dbSet(presenceRef,null);}catch(e){}} presenceRef=null; }
-function watchPresenceCount(){ if(!rtdb)return; try{ onValue(dbRef(rtdb,'presence'),(snap)=>{ const data=snap.val()||{}; const count=Object.keys(data).length; const chip=document.getElementById('presence-chip'); const countEl=document.getElementById('presence-count'); const statsEl=document.getElementById('presence-stats'); if(chip){chip.classList.toggle('show',count>0);if(countEl)countEl.textContent=count;} if(statsEl){statsEl.innerHTML=count>0?`<div style="font-size:1.8rem;font-weight:700;color:var(--green);margin-bottom:4px">👥 ${count}</div><div style="font-size:.85rem;color:var(--text2)">personne${count>1?'s':''} révise${count>1?'nt':''} en ce moment — courage ! 💪</div>`:'<div style="color:var(--text3)">Personne d\'autre en ce moment.</div>';} }); }catch(e){} }
+async function watchPresenceCount(){ if(!rtdb)return; let totalUsers=0; try{ const lbSnap=await getDocs(collection(db,'leaderboard')); totalUsers=lbSnap.size; }catch(e){} try{ onValue(dbRef(rtdb,'presence'),(snap)=>{ const data=snap.val()||{}; const count=Object.keys(data).length; const chip=document.getElementById('presence-chip'); const countEl=document.getElementById('presence-count'); const statsEl=document.getElementById('presence-stats'); if(chip){chip.classList.toggle('show',count>0);if(countEl)countEl.textContent=count;} if(statsEl){statsEl.innerHTML=`${count>0?`<div style="font-size:1.8rem;font-weight:700;color:var(--green);margin-bottom:4px">👥 ${count}</div><div style="font-size:.85rem;color:var(--text2);margin-bottom:8px">personne${count>1?'s':''} révise${count>1?'nt':''} en ce moment — courage ! 💪</div>`:`<div style="color:var(--text3);margin-bottom:8px">Personne d'autre en ce moment.</div>`}${totalUsers>0?`<div style="font-size:.82rem;color:var(--text3)">🎓 ${totalUsers} étudiant${totalUsers>1?'s':''} inscrit${totalUsers>1?'s':''} sur Blokly</div>`:''}`;} },(err)=>{ const statsEl=document.getElementById('presence-stats'); if(statsEl) statsEl.innerHTML=`<div style="color:var(--text3)">Compteur indisponible.</div>`; }); }catch(e){ const statsEl=document.getElementById('presence-stats'); if(statsEl) statsEl.innerHTML=`<div style="color:var(--text3)">Compteur indisponible.</div>`; } }
 
 function showOnboarding(){obStep=0;document.getElementById('onboarding-overlay').classList.add('open');renderObStep();}
 function renderObStep(){ document.querySelectorAll('.onboarding-step').forEach((s,i)=>s.classList.toggle('active',i===obStep)); const dots=document.getElementById('ob-dots'); dots.innerHTML=Array.from({length:obTotal},(_,i)=>`<div class="onboarding-dot${i===obStep?' active':''}"></div>`).join(''); const btn=document.getElementById('ob-next'); if(obStep===obTotal-1){btn.textContent='Commencer !';btn.onclick=finishOnboarding;}else{btn.textContent='Suivant →';btn.onclick=nextOnboarding;} document.getElementById('ob-skip').style.display=obStep===obTotal-1?'none':'inline-block'; }
@@ -2139,7 +2187,7 @@ document.addEventListener('keydown',e=>{ const tag=e.target.tagName; if(tag==='I
 document.addEventListener('click',e=>{ if(!document.getElementById('ctx').contains(e.target)) hideCtx(); });
 
 function switchTab(tp){ document.querySelectorAll('.tab,.tab-study').forEach(el=>el.classList.remove('active')); document.querySelectorAll('.tab,.tab-study').forEach(el=>{if(el.dataset.tab===tp)el.classList.add('active');}); document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); const pg=document.getElementById('page-'+tp);if(pg)pg.classList.add('active'); if(tp==='planning')renderPlanning(); if(tp==='agenda')renderAgenda();
-if(tp==='progress'){renderProgress();renderProgChart();renderAgenda();} if(tp==='progress'){renderProgress();renderProgChart();renderAgenda();} if(tp==='confidence'){renderConf();renderPredict();} if(tp==='syntheses')renderSynth(); if(tp==='flashcards')initFlashcardsPage(); if(tp==='repetition')renderRepetition(); if(tp==='exams'){renderExams();renderOverload('overload-bar2');} if(tp==='stats'){renderXPStats();renderPieChart();renderBadges();renderWeeklyRecap();renderHeat('heatmap-stats');renderThemeButtons();} if(tp==='journal')renderJournal(); if(tp==='study')renderStudy(); bubbleHidden=false;if(timerOn)updateBubble(true,false); }
+if(tp==='progress'){renderProgress();renderProgChart();renderAgenda();} if(tp==='progress'){renderProgress();renderProgChart();renderAgenda();} if(tp==='confidence'){renderConf();renderPredict();} if(tp==='syntheses')renderSynth(); if(tp==='flashcards')initFlashcardsPage(); if(tp==='repetition')renderRepetition(); if(tp==='exams'){renderExams();renderOverload('overload-bar2');} if(tp==='stats'){renderXPStats();renderPieChart();renderBadges();renderWeeklyRecap();renderHeat('heatmap-stats');renderThemeButtons();renderLeaderboard();} if(tp==='journal')renderJournal(); if(tp==='study')renderStudy(); bubbleHidden=false;if(timerOn)updateBubble(true,false); }
 function setView(v){ viewMode=v; document.getElementById('vt-week').classList.toggle('active',v==='week'); document.getElementById('vt-month').classList.toggle('active',v==='month'); document.getElementById('view-week').style.display=v==='week'?'block':'none'; document.getElementById('view-month').style.display=v==='month'?'block':'none'; document.getElementById('overload-section').style.display=v==='week'?'block':'none'; renderPlanning(); }
 function changeNav(d){if(viewMode==='week')wkOff+=d;else mthOff+=d;renderPlanning();}
 function goToToday(){ wkOff=0; mthOff=0; renderPlanning(); showToast('📍 Semaine actuelle'); }
@@ -2721,6 +2769,7 @@ function renderPieChart(){
 
 const BADGE_DEFS=[
   // ── Existants ──
+  {id:'welcome',         ico:'👋', name:'Bienvenue !',          desc:'Tu as rejoint Blokly Study. Bonne chance pour ton blocus !', xpBonus:50,   check:()=>earnedBadges.has('welcome')},
   {id:'first_bloc',    ico:'🎯', name:'Premier bloc',        desc:'Marque ton tout premier bloc comme effectué.',                          xpBonus:0,    check:()=>subjects.some(s=>s.doneBlocks>0)},
   {id:'streak3',       ico:'🔥', name:'Streak 3j',           desc:'Travaille 3 jours de suite sur Blokly.',                               xpBonus:0,    check:()=>streak>=3},
   {id:'streak7',       ico:'⚡', name:'Streak 7j',           desc:'7 jours consécutifs de révision. La régularité paie !',                xpBonus:500,  check:()=>streak>=7},
