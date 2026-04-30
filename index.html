@@ -2102,7 +2102,7 @@ function openPseudoModal(){ const current=currentUser?.displayName||currentUser?
 function closePseudoModal(){ document.getElementById('pseudo-modal').style.display='none'; }
 async function savePseudo(){ const val=document.getElementById('pseudo-input').value.trim(); if(!val){showToast('Le pseudo ne peut pas être vide.');return;} try{ await updateProfile(currentUser,{displayName:val}); document.getElementById('user-email-lbl').textContent=val; document.getElementById('user-avatar').textContent=(val[0]||'?').toUpperCase(); closePseudoModal(); showToast('✅ Pseudo mis à jour !'); pushLeaderboard(); }catch(e){ showToast('Erreur lors de la mise à jour.'); } }
 window.openPseudoModal=openPseudoModal; window.closePseudoModal=closePseudoModal; window.savePseudo=savePseudo;
-window.renderLeaderboard = renderLeaderboard;
+window.renderLeaderboard = renderLeaderboard; window.escHtml = escHtml;
 window.db = db;
 window.getDocs = getDocs;
 window.collection = collection;
