@@ -2055,7 +2055,7 @@ onAuthStateChanged(auth, async user => {
     applyTheme(currentTheme); updateXPBar(); saveToLS();
     if(autoSaveTimer){clearInterval(autoSaveTimer);autoSaveTimer=null;}
     autoSaveTimer=setInterval(()=>saveToCloud(),30000);
-    setupPresence(); setPresenceActive(true); watchPresenceCount(); purgeOldBlocks();
+    setupPresence().then(()=>{ setPresenceActive(true); watchPresenceCount(); }); purgeOldBlocks(); pushLeaderboard();
     if(!earnedBadges.has('welcome')){ earnedBadges.add('welcome'); addXP(50); showToast('👋 Badge "Bienvenue !" débloqué ! +50 XP'); scheduleSave(); }
     renderPlanning(); renderExams(); setJMood('🙂'); populateStudySubjects(); populateJournalSubjects(); updateUndoButtons();
   } else {
