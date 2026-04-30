@@ -1474,10 +1474,12 @@ button.danger-btn:hover{background:var(--red);color:#fff}
           <option value="pomodoro">Pomodoro 25/5</option>
           <option value="pomodoro50">Pomodoro 50/10</option>
         </select>
-        <select id="study-dur" onchange="resetTimer()">
+        <select id="study-dur" onchange="onDurChange()">
           <option value="25">25 min</option><option value="45" selected>45 min</option>
           <option value="60">60 min</option><option value="90">90 min</option><option value="120">120 min</option>
+          <option value="custom">⚙️ Personnalisé…</option>
         </select>
+        <input type="number" id="study-dur-custom" min="1" max="600" placeholder="min" style="display:none;width:70px;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.85rem" onchange="resetTimer()">
         <button class="tbtn" onclick="enterFocusMode()" style="padding:7px 12px;font-size:.8rem">🎯 Focus</button>
       </div>
       <div id="pomo-status" style="display:none;font-size:.82rem;color:var(--text2);margin-bottom:10px;padding:7px 10px;background:var(--bg2);border-radius:var(--radius-sm);border:1px solid var(--border)"></div>
@@ -2101,6 +2103,10 @@ function closePseudoModal(){ document.getElementById('pseudo-modal').style.displ
 async function savePseudo(){ const val=document.getElementById('pseudo-input').value.trim(); if(!val){showToast('Le pseudo ne peut pas être vide.');return;} try{ await updateProfile(currentUser,{displayName:val}); document.getElementById('user-email-lbl').textContent=val; document.getElementById('user-avatar').textContent=(val[0]||'?').toUpperCase(); closePseudoModal(); showToast('✅ Pseudo mis à jour !'); pushLeaderboard(); }catch(e){ showToast('Erreur lors de la mise à jour.'); } }
 window.openPseudoModal=openPseudoModal; window.closePseudoModal=closePseudoModal; window.savePseudo=savePseudo;
 window.renderLeaderboard = renderLeaderboard;
+window.db = db;
+window.getDocs = getDocs;
+window.collection = collection;
+window.onDurChange=onDurChange;
 function computeFocusXP(elapsedSecs){ if(elapsedSecs < XP_MIN_SECS) return 0; const mins = Math.floor(elapsedSecs / 60); return mins * XP_PER_MIN; }
 function updateXPBar(){
   const curDef=XP_LEVELS.find(l=>l.level===level)||XP_LEVELS[0];
@@ -2848,13 +2854,16 @@ function renderJournal(){const el=document.getElementById('journal-list');if(!jo
 function populateStudySubjects(){const sel=document.getElementById('study-subj');if(!sel)return;sel.innerHTML=subjects.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');}
 function renderStudy(){ populateStudySubjects(); renderHeat('heatmap'); document.getElementById('st-sess').textContent=todaySess; document.getElementById('st-mins').textContent=todayMins; document.getElementById('st-streak').textContent=streak; updateStudySubj(); updateXPPreview(); }
 function updateStudySubj(){ const sid=parseInt(document.getElementById('study-subj')?.value); const s=subjects.find(x=>x.id===sid); if(s){ document.getElementById('sdot').style.background=s.color; document.getElementById('sname-disp').textContent=s.name; document.getElementById('focus-subj-lbl').textContent=s.name; const next=blocks.filter(b=>b.type==='rev'&&b.subj===sid&&b.status==='todo').sort((a,b)=>a.weekOffset*7+a.day-b.weekOffset*7-b.day)[0]; document.getElementById('focus-task').textContent=next?next.task||'Réviser '+s.name:'Aucun bloc prévu.'; } }
+
+function onDurChange(){ const val=document.getElementById('study-dur').value; const custom=document.getElementById('study-dur-custom'); if(val==='custom'){ custom.style.display='inline-block'; custom.focus(); }else{ custom.style.display='none'; resetTimer(); } }
+
 function onModeChange(){
   const m=document.getElementById('study-mode').value;
   document.getElementById('study-dur').style.display=m==='custom'?'':'none';
   pomoCycle=0;pomoPhase='work';
   resetTimer();
 }
-function resetTimer(){ if(timerIv){clearInterval(timerIv);timerIv=null;}timerOn=false; timerSessionElapsed=0; setPresenceActive(false); const m=document.getElementById('study-mode')?.value||'custom'; const durSel=parseInt(document.getElementById('study-dur')?.value||45); if(m==='pomodoro'){timerTotal=25*60;pomoPhase='work';}else if(m==='pomodoro50'){timerTotal=50*60;pomoPhase='work';}else timerTotal=durSel*60; timerLeft=timerTotal; document.getElementById('timer-disp').textContent=hms(timerLeft); document.getElementById('focus-time-big').textContent=hms(timerLeft); document.getElementById('timer-lbl').textContent='prêt'; document.getElementById('btn-start').textContent='▶ Démarrer'; document.getElementById('focus-btn-start').textContent='▶ Démarrer'; document.getElementById('sdot').style.animation=''; updateBubble(false); updateRing(); updateXPPreview(); }
+function resetTimer(){ if(timerIv){clearInterval(timerIv);timerIv=null;}timerOn=false; timerSessionElapsed=0; setPresenceActive(false); const m=document.getElementById('study-mode')?.value||'custom'; const durRaw=document.getElementById('study-dur')?.value; const durSel=durRaw==='custom'?parseInt(document.getElementById('study-dur-custom')?.value||45)||45:parseInt(durRaw||45); if(m==='pomodoro'){timerTotal=25*60;pomoPhase='work';}else if(m==='pomodoro50'){timerTotal=50*60;pomoPhase='work';}else timerTotal=durSel*60; timerLeft=timerTotal; document.getElementById('timer-disp').textContent=hms(timerLeft); document.getElementById('focus-time-big').textContent=hms(timerLeft); document.getElementById('timer-lbl').textContent='prêt'; document.getElementById('btn-start').textContent='▶ Démarrer'; document.getElementById('focus-btn-start').textContent='▶ Démarrer'; document.getElementById('sdot').style.animation=''; updateBubble(false); updateRing(); updateXPPreview(); }
 function timerToggle(){ if(timerOn){ clearInterval(timerIv);timerIv=null;timerOn=false; setPresenceActive(false); document.getElementById('btn-start').textContent='▶ Reprendre'; document.getElementById('focus-btn-start').textContent='▶ Reprendre'; document.getElementById('timer-lbl').textContent='pause'; document.getElementById('sdot').style.animation='pulse 1.4s infinite'; document.getElementById('bubble-dot').classList.add('paused'); } else { if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} timerOn=true; setPresenceActive(true); const h=new Date().getHours(); if(h>=22) _nightOwlUnlocked=true; document.getElementById('btn-start').textContent='⏸ Pause'; document.getElementById('focus-btn-start').textContent='⏸ Pause'; document.getElementById('timer-lbl').textContent='en cours'; document.getElementById('sdot').style.animation=''; document.getElementById('bubble-dot').classList.remove('paused'); updateBubble(true,false); timerIv=setInterval(timerTick,1000); } }
 function timerTick(){ timerLeft--;timerSessionElapsed++; if(timerLeft<=0){timerEnd();return;} document.getElementById('timer-disp').textContent=hms(timerLeft); document.getElementById('focus-time-big').textContent=hms(timerLeft); document.getElementById('bubble-time').textContent=hms(timerLeft); updateRing(); }
 function timerEnd(){ 
@@ -2983,6 +2992,7 @@ function setSound(s){
   document.querySelectorAll('.sound-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('snd-'+s)?.classList.add('active');
   if(!audioCtx) try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
   if(soundNodes.src){try{soundNodes.src.stop();}catch(e){}}
   if(soundNodes.osc){try{soundNodes.osc.stop();}catch(e){}}
   if(soundNodes._oscR){try{soundNodes._oscR.stop();}catch(e){}}
