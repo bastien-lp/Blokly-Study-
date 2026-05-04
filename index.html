@@ -3337,6 +3337,7 @@ async function viewUserProfile(uid, pseudo){
     // Charger leaderboard
     const lbSnap=await getDoc(doc(db,'leaderboard',uid));
     const lb=lbSnap.exists()?lbSnap.data():{};
+    console.log('profil chargé:',prof, 'lb:',lb);
 
     if(prof.privacy?.public===false){
       document.getElementById('uvp-body').innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text3)">🔒 Ce profil est privé.</div>';
@@ -3383,7 +3384,7 @@ async function viewUserProfile(uid, pseudo){
     document.getElementById('uvp-body').innerHTML='<div style="text-align:center;color:var(--text3)">Erreur de chargement.</div>';
   }
 }
-window.viewUserProfile=viewUserProfile; window.closeChatModal=closeChatModal; window.sendChatMessage=sendChatMessage; window.chatKeyDown=chatKeyDown;
+window.viewUserProfile=viewUserProfile; window.openChatModal=openChatModal; window.closeChatModal=closeChatModal; window.sendChatMessage=sendChatMessage; window.chatKeyDown=chatKeyDown;
 window.toggleReaction=toggleReaction; window.pinMessage=pinMessage; window.replyTo=replyTo; window.cancelReply=cancelReply;
 window.scrollToPinned=scrollToPinned; window.scrollToMessage=scrollToMessage;
 window.toggleEmojiPicker=toggleEmojiPicker; window.insertEmoji=insertEmoji;
