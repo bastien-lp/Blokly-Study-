@@ -2490,10 +2490,20 @@ function addXP(amount){ const prevLevel=level; xp+=amount;
 }
 function getWeekKey(){ const d=new Date(); const day=d.getDay()||7; d.setDate(d.getDate()-day+1); return d.toISOString().slice(0,10); }
 async function pushLeaderboard(){ if(!currentUser||!db)return; if(userProfile.privacy?.leaderboard===false){ try{ await deleteDoc(doc(db,'leaderboard',currentUser.uid)); }catch(e){} return; } try{ const pseudo=currentUser.displayName||currentUser.email?.split('@')[0]||'Anonyme'; await setDoc(doc(db,'leaderboard',currentUser.uid),{ uid:currentUser.uid, pseudo, xp, xpToday, xpThisWeek, level, updatedAt:new Date().toISOString() }); }catch(e){} }
-async function renderLeaderboard(tab){ leaderboardTab=tab||leaderboardTab; const wrap=document.getElementById('leaderboard-list'); if(!wrap)return; wrap.innerHTML=`<div style="text-align:center;padding:1rem;color:var(--text3);font-size:.85rem">Chargement…</div>`; document.querySelectorAll('.lb-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===leaderboardTab)); try{ const snap=await getDocs(collection(db,'leaderboard')); const rows=[]; snap.forEach(d=>rows.push(d.data())); const sortKey=leaderboardTab==='today'?'xpToday':leaderboardTab==='week'?'xpThisWeek':'xp'; rows.sort((a,b)=>(b[sortKey]||0)-(a[sortKey]||0)); const top=rows.slice(0,20); const medals=['🥇','🥈','🥉']; wrap.innerHTML=top.length===0?`<div style="text-align:center;padding:1.5rem;color:var(--text3)">Aucun joueur pour l'instant.</div>`:top.map((r,i)=>{ const isMe=r.uid===currentUser?.uid; const xpVal=r[sortKey]||0; const medal=i<3?medals[i]:`<span style="font-size:.75rem;color:var(--text3)">#${i+1}</span>`; return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);background:${isMe?'rgba(74,144,217,.12)':'transparent'};border:${isMe?'1px solid rgba(74,144,217,.3)':'1px solid transparent'};margin-bottom:4px"><div style="width:28px;text-align:center;font-size:1.1rem">${medal}</div><div style="flex:1;min-width:0"><div style="font-size:.85rem;font-weight:${isMe?700:500};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${isMe?'⭐ ':''} ${r.pseudo||'?'}</div><div style="font-size:.72rem;color:var(--text3)">Nv. ${r.level||1}</div></div><div style="font-size:.88rem;font-weight:700;color:var(--xp-color)">${xpVal.toLocaleString()} XP</div></div>`; }).join(''); // Stats comparatives
-const myRank=rows.findIndex(r=>r.uid===currentUser?.uid);
-const myRow=myRank>=20?rows[myRank]:null;
-const total=rows.length;
+async function renderLeaderboard(tab){ leaderboardTab=tab||leaderboardTab; const wrap=document.getElementById('leaderboard-list'); if(!wrap)return; wrap.innerHTML=`<div style="text-align:center;padding:1rem;color:var(--text3);font-size:.85rem">Chargement…</div>`; document.querySelectorAll('.lb-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===leaderboardTab)); try{ const snap=await getDocs(collection(db,'leaderboard')); const rows=[]; snap.forEach(d=>rows.push(d.data())); const sortKey=leaderboardTab==='today'?'xpToday':leaderboardTab==='week'?'xpThisWeek':'xp';
+const todayStr=new Date().toISOString().slice(0,10);
+const weekStr=getWeekKey();
+const filtered=leaderboardTab==='today'
+  ? rows.filter(r=>r.updatedAt&&r.updatedAt.slice(0,10)===todayStr)
+  : leaderboardTab==='week'
+  ? rows.filter(r=>r.updatedAt&&r.updatedAt.slice(0,10)>=weekStr)
+  : rows;
+filtered.sort((a,b)=>(b[sortKey]||0)-(a[sortKey]||0));
+const top=filtered.slice(0,20);
+const rows2=filtered; const medals=['🥇','🥈','🥉']; wrap.innerHTML=top.length===0?`<div style="text-align:center;padding:1.5rem;color:var(--text3)">Aucun joueur pour l'instant.</div>`:top.map((r,i)=>{ const isMe=r.uid===currentUser?.uid; const xpVal=r[sortKey]||0; const medal=i<3?medals[i]:`<span style="font-size:.75rem;color:var(--text3)">#${i+1}</span>`; return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);background:${isMe?'rgba(74,144,217,.12)':'transparent'};border:${isMe?'1px solid rgba(74,144,217,.3)':'1px solid transparent'};margin-bottom:4px"><div style="width:28px;text-align:center;font-size:1.1rem">${medal}</div><div style="flex:1;min-width:0"><div style="font-size:.85rem;font-weight:${isMe?700:500};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${isMe?'⭐ ':''} ${r.pseudo||'?'}</div><div style="font-size:.72rem;color:var(--text3)">Nv. ${r.level||1}</div></div><div style="font-size:.88rem;font-weight:700;color:var(--xp-color)">${xpVal.toLocaleString()} XP</div></div>`; }).join(''); // Stats comparatives
+const myRank=rows2.findIndex(r=>r.uid===currentUser?.uid);
+const myRow=myRank>=20?rows2[myRank]:null;
+const total=rows2.length;
 let statsHtml='';
 if(myRank>=0&&total>0){
   const percentile=Math.round((1-(myRank/total))*100);
@@ -2576,6 +2586,29 @@ async function saveProfile(){
     document.getElementById('user-email-lbl').textContent=pseudo;
     document.getElementById('user-avatar').textContent=(pseudo[0]||'?').toUpperCase();
     await setDoc(doc(db,'users',currentUser.uid,'data','profile'),{...userProfile,pseudo,updatedAt:new Date().toISOString()});
+    // Mettre à jour le pseudo dans tous les groupes
+    try{
+      const groupsSnap=await getDocs(collection(db,'groups'));
+      for(const groupDoc of groupsSnap.docs){
+        const g=groupDoc.data();
+        if(g.members?.[currentUser.uid]){
+          await setDoc(doc(db,'groups',groupDoc.id),{
+            ...g,
+            members:{...g.members,[currentUser.uid]:{...g.members[currentUser.uid],pseudo}}
+          });
+        }
+      }
+    }catch(e){}
+    // Mettre à jour le pseudo dans la liste d'amis
+    try{
+      const friendsSnap=await getDocs(collection(db,'friends',currentUser.uid,'list'));
+      friendsSnap.forEach(async fd=>{
+        const friendUid=fd.id;
+        await setDoc(doc(db,'friends',friendUid,'list',currentUser.uid),{
+          ...fd.data(), pseudo
+        });
+      });
+    }catch(e){}
     closeProfileModal();
     showToast('✅ Profil mis à jour !');
     if(userProfile.privacy?.leaderboard!==false) pushLeaderboard();
