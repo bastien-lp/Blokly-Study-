@@ -926,6 +926,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 .emoji-btn:hover{background:var(--bg3)}
 .chat-extra-btn{width:32px;height:32px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
 .chat-extra-btn:hover{background:var(--border);color:var(--text)}
+.pm-modal-inner{width:520px;max-width:98vw;height:75vh;max-height:600px;background:var(--card-bg);border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.4);animation:slideUp .2s ease}
 .chat-notif-badge{position:absolute;top:-3px;right:-3px;width:16px;height:16px;border-radius:50%;background:var(--red);color:#fff;font-size:.58rem;font-weight:700;display:none;align-items:center;justify-content:center;border:2px solid var(--card-bg)}
 .chat-notif-badge.show{display:flex}
 
@@ -1610,6 +1611,38 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 </div>
 
 <!-- MODAL CRÉER GROUPE -->
+ <!-- MODALE MESSAGE PRIVÉ -->
+<div class="modal-bg" id="modal-private-chat" style="align-items:center;justify-content:center">
+  <div class="pm-modal-inner">
+    <div class="chat-header">
+      <div class="chat-header-avatar" id="pm-avatar">?</div>
+      <div class="chat-header-info">
+        <div class="chat-header-name" id="pm-name">—</div>
+        <div class="chat-header-sub" id="pm-status"></div>
+      </div>
+      <button onclick="closePMChat()" style="background:var(--bg3);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:.9rem;color:var(--text2)">✕</button>
+    </div>
+    <div class="chat-messages" id="pm-messages"></div>
+    <div class="chat-reply-preview" id="pm-reply-preview">
+      <div style="font-size:.8rem">↩️</div>
+      <div class="chat-reply-text" id="pm-reply-text"></div>
+      <button onclick="cancelPMReply()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:.9rem">✕</button>
+    </div>
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="pm-input" rows="1" placeholder="Écris un message… (Entrée pour envoyer)" onkeydown="pmKeyDown(event)" oninput="pmInputChanged()"></textarea>
+      <button class="chat-send-btn" onclick="sendPMMessage()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE INVITATION GROUPE -->
+<div class="modal-bg" id="modal-invite-group">
+  <div class="modal" style="width:380px">
+    <h3>👥 Inviter dans un groupe</h3>
+    <div id="invite-groups-list"><div style="text-align:center;padding:1rem;color:var(--text3)">Chargement…</div></div>
+    <div class="brow"><button class="ghost" onclick="closeModal('modal-invite-group')">Annuler</button></div>
+  </div>
+</div>
  <div class="modal-bg" id="modal-group-chat" style="align-items:center;justify-content:center">
   <div class="chat-modal-inner">
 
@@ -2183,7 +2216,7 @@ const db    = getFirestore(fbApp);
 const rtdb  = getDatabase(fbApp);
 
 const LS_KEY = uid => `blokly_v22_${uid}`;
-const TODAY  = new Date(); TODAY.setHours(0,0,0,0);
+let TODAY  = new Date(); TODAY.setHours(0,0,0,0);
 const COLORS = [
   '#FF0000','#FF2400','#FF4500','#FF6000','#FF7F00',
   '#FF9900','#FFB300','#FFD700','#FFFF00','#CCFF00',
@@ -2293,8 +2326,19 @@ const fmt  = d => d.getDate()+'/'+(d.getMonth()+1);
 const hm   = dec => { const h=Math.floor(dec),m=Math.round((dec%1)*60); return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0') };
 const hms  = s => String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 const getWeekStart = off => { const d=new Date(TODAY),dw=d.getDay(); d.setDate(d.getDate()-(dw===0?6:dw-1)+off*7); d.setHours(0,0,0,0); return d };
+// Utilitaires dates absolues
+const dateToISO = d => d.toISOString().slice(0,10);
+const isoToDate = s => { const d=new Date(s+'T00:00:00'); return d; };
+const blockDate = b => { if(b.dateStr) return isoToDate(b.dateStr); const ws=getWeekStart(b.weekOffset||0); const d=new Date(ws); d.setDate(d.getDate()+(b.day||0)); return d; };
+const blockDateStr = b => { if(b.dateStr) return b.dateStr; return dateToISO(blockDate(b)); };
+const migrateBlock = b => { if(!b.dateStr){ const d=blockDate(b); b.dateStr=dateToISO(d); b.day=(d.getDay()||7)-1; } return b; };
 const decHToTop = h => (h-START_H)*PX_H;
-const blocksOnDay = (di,off) => blocks.filter(b=>b.day===di&&b.weekOffset===off);
+const blocksOnDay = (di,off) => {
+  const ws=getWeekStart(off);
+  const target=new Date(ws); target.setDate(ws.getDate()+di);
+  const targetStr=dateToISO(target);
+  return blocks.filter(b=>blockDateStr(b)===targetStr);
+};
 const getExamDayInfo = dateStr => { if(!dateStr)return null; const ed=new Date(dateStr); ed.setHours(0,0,0,0); const ws=getWeekStart(wkOff); const diff=Math.round((ed-ws)/86400000); return (diff>=0&&diff<=6)?diff:null };
 const showToast = msg => { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500) };
 const isSRDueToday = (sid,ci) => { const k=`${sid}_${ci}`,sr=srData[k]; if(!sr)return false; const iv=[1,7,30],reviews=sr.reviews||[],ni=reviews.length; if(ni>=iv.length)return false; const last=reviews.length>0?reviews[reviews.length-1]:sr.firstStudy; return last+iv[ni]*86400000<=TODAY.getTime() };
@@ -2324,7 +2368,8 @@ function saveToLS(){
       streak,todaySess,todayMins,darkMode,nid,xp,level,unlockedThemes,currentTheme,
       earnedBadges:[...earnedBadges],
       totalFocusHours,lastStudyDate,weekLongSessions,
-      _totalSRValidated
+      _totalSRValidated,
+      xpToday,xpThisWeek,lastXPDateDay,lastXPDateWeek
     })); 
   }catch(e){} 
 }
@@ -2355,6 +2400,11 @@ if(d.totalFocusHours!==undefined)totalFocusHours=d.totalFocusHours;
 if(d.lastStudyDate)lastStudyDate=d.lastStudyDate;
 if(d.weekLongSessions!==undefined)weekLongSessions=d.weekLongSessions;
 if(d._totalSRValidated!==undefined)_totalSRValidated=d._totalSRValidated;
+if(d.xpToday!==undefined)xpToday=d.xpToday; if(d.xpThisWeek!==undefined)xpThisWeek=d.xpThisWeek;
+if(d.lastXPDateDay)lastXPDateDay=d.lastXPDateDay; if(d.lastXPDateWeek)lastXPDateWeek=d.lastXPDateWeek;
+const todayKey=new Date().toISOString().slice(0,10); const weekKey=getWeekKey();
+if(lastXPDateDay!==todayKey){xpToday=0;lastXPDateDay=todayKey;}
+if(lastXPDateWeek!==weekKey){xpThisWeek=0;lastXPDateWeek=weekKey;}
 const tsnap=await getDoc(doc(db,'users',currentUser.uid,'data','templates')); if(tsnap.exists()&&tsnap.data().savedTemplates) savedTemplates=tsnap.data().savedTemplates; setSyncState('ok'); return true; }catch(e){console.error('loadFromCloud:',e);setSyncState('error');return false;} }
 
 function setAuthErr(msg,type='error'){const el=document.getElementById('auth-err');el.textContent=msg;el.className='auth-err '+(msg?type:'');}
@@ -2387,7 +2437,7 @@ onAuthStateChanged(auth, async user => {
     applyTheme(currentTheme); updateXPBar(); saveToLS();
     if(autoSaveTimer){clearInterval(autoSaveTimer);autoSaveTimer=null;}
     autoSaveTimer=setInterval(()=>saveToCloud(),30000);
-   setupPresence().then(()=>{ setPresenceActive(true); watchPresenceCount(); watchOnlineStatus(); }); purgeOldBlocks(); setTimeout(()=>pushLeaderboard(), 2000);
+   setupPresence().then(()=>{ if(userProfile.privacy?.online!==false) setPresenceActive(true); watchPresenceCount(); watchOnlineStatus(); }); purgeOldBlocks(); setTimeout(()=>pushLeaderboard(), 2000);
 getDoc(doc(db,'users',user.uid,'data','profile')).then(snap=>{ if(snap.exists()) userProfile={...userProfile,...snap.data()}; }).catch(()=>{});
     if(!user.displayName){ setTimeout(()=>{ showToast('👋 Choisis ton pseudo pour apparaître dans le classement !'); openPseudoModal(); }, 1500); }
     if(!earnedBadges.has('welcome')){ earnedBadges.add('welcome'); addXP(50); showToast('👋 Badge "Bienvenue !" débloqué ! +50 XP'); scheduleSave(); }
@@ -2416,7 +2466,18 @@ function resetAppState(){
   _sniperUnlocked=false;_totalSRValidated=0;
   totalFocusHours=0;lastStudyDate='';weekLongSessions=0;
 }
-function purgeOldBlocks(){blocks=blocks.filter(b=>b.weekOffset>=-8&&b.weekOffset<=52);}
+function purgeOldBlocks(){
+  // Migrer les anciens blocs vers dates absolues
+  blocks=blocks.map(migrateBlock);
+  // Purger les blocs trop vieux (plus de 2 mois) ou trop lointains (plus de 1 an)
+  const now=new Date(); now.setHours(0,0,0,0);
+  const twoMonthsAgo=new Date(now); twoMonthsAgo.setDate(now.getDate()-60);
+  const oneYearAhead=new Date(now); oneYearAhead.setFullYear(now.getFullYear()+1);
+  blocks=blocks.filter(b=>{
+    const d=blockDate(b);
+    return d>=twoMonthsAgo && d<=oneYearAhead;
+  });
+}
 
 function addXP(amount){ const prevLevel=level; xp+=amount;
   const todayKey=new Date().toISOString().slice(0,10);
@@ -2428,7 +2489,7 @@ function addXP(amount){ const prevLevel=level; xp+=amount;
   pushLeaderboard();
 }
 function getWeekKey(){ const d=new Date(); const day=d.getDay()||7; d.setDate(d.getDate()-day+1); return d.toISOString().slice(0,10); }
-async function pushLeaderboard(){ if(!currentUser||!db)return; try{ const pseudo=currentUser.displayName||currentUser.email?.split('@')[0]||'Anonyme'; await setDoc(doc(db,'leaderboard',currentUser.uid),{ uid:currentUser.uid, pseudo, xp, xpToday, xpThisWeek, level, updatedAt:new Date().toISOString() }); }catch(e){} }
+async function pushLeaderboard(){ if(!currentUser||!db)return; if(userProfile.privacy?.leaderboard===false){ try{ await deleteDoc(doc(db,'leaderboard',currentUser.uid)); }catch(e){} return; } try{ const pseudo=currentUser.displayName||currentUser.email?.split('@')[0]||'Anonyme'; await setDoc(doc(db,'leaderboard',currentUser.uid),{ uid:currentUser.uid, pseudo, xp, xpToday, xpThisWeek, level, updatedAt:new Date().toISOString() }); }catch(e){} }
 async function renderLeaderboard(tab){ leaderboardTab=tab||leaderboardTab; const wrap=document.getElementById('leaderboard-list'); if(!wrap)return; wrap.innerHTML=`<div style="text-align:center;padding:1rem;color:var(--text3);font-size:.85rem">Chargement…</div>`; document.querySelectorAll('.lb-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===leaderboardTab)); try{ const snap=await getDocs(collection(db,'leaderboard')); const rows=[]; snap.forEach(d=>rows.push(d.data())); const sortKey=leaderboardTab==='today'?'xpToday':leaderboardTab==='week'?'xpThisWeek':'xp'; rows.sort((a,b)=>(b[sortKey]||0)-(a[sortKey]||0)); const top=rows.slice(0,20); const medals=['🥇','🥈','🥉']; wrap.innerHTML=top.length===0?`<div style="text-align:center;padding:1.5rem;color:var(--text3)">Aucun joueur pour l'instant.</div>`:top.map((r,i)=>{ const isMe=r.uid===currentUser?.uid; const xpVal=r[sortKey]||0; const medal=i<3?medals[i]:`<span style="font-size:.75rem;color:var(--text3)">#${i+1}</span>`; return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);background:${isMe?'rgba(74,144,217,.12)':'transparent'};border:${isMe?'1px solid rgba(74,144,217,.3)':'1px solid transparent'};margin-bottom:4px"><div style="width:28px;text-align:center;font-size:1.1rem">${medal}</div><div style="flex:1;min-width:0"><div style="font-size:.85rem;font-weight:${isMe?700:500};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${isMe?'⭐ ':''} ${r.pseudo||'?'}</div><div style="font-size:.72rem;color:var(--text3)">Nv. ${r.level||1}</div></div><div style="font-size:.88rem;font-weight:700;color:var(--xp-color)">${xpVal.toLocaleString()} XP</div></div>`; }).join(''); // Stats comparatives
 const myRank=rows.findIndex(r=>r.uid===currentUser?.uid);
 const myRow=myRank>=20?rows[myRank]:null;
@@ -2578,18 +2639,32 @@ async function renderFriendRequests(){
     snap.forEach(d=>requests.push({id:d.id,...d.data()}));
     const pending=requests.filter(r=>r.status==='pending');
     if(!pending.length){ el.innerHTML=`<div style="color:var(--text3);font-size:.82rem;text-align:center;padding:1rem">Aucune demande en attente.</div>`; return; }
-    el.innerHTML=pending.map(r=>`
-      <div class="notif-item">
-        <div class="friend-avatar">${(r.fromPseudo[0]||'?').toUpperCase()}</div>
-        <div style="flex:1">
-          <div style="font-size:.85rem;font-weight:600;color:var(--text)">${r.fromPseudo}</div>
-          <div style="font-size:.72rem;color:var(--text3)">veut être ton ami</div>
-        </div>
-        <div style="display:flex;gap:6px">
-          <button style="background:var(--success-bg);border:none;border-radius:var(--radius-sm);padding:5px 10px;cursor:pointer;font-size:.75rem;color:var(--success-text);font-weight:600" onclick="acceptFriendRequest('${r.from}','${r.fromPseudo}','${r.id}')">✓</button>
-          <button style="background:var(--danger-bg);border:none;border-radius:var(--radius-sm);padding:5px 10px;cursor:pointer;font-size:.75rem;color:var(--danger-text);font-weight:600" onclick="declineFriendRequest('${r.id}')">✕</button>
-        </div>
-      </div>`).join('');
+    el.innerHTML=pending.map(r=>{
+      if(r.type==='groupInvite') return`
+        <div class="notif-item">
+          <div class="friend-avatar">👥</div>
+          <div style="flex:1">
+            <div style="font-size:.85rem;font-weight:600;color:var(--text)">${r.fromPseudo}</div>
+            <div style="font-size:.72rem;color:var(--text3)">t'invite dans <strong>${r.groupName}</strong></div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button style="background:var(--success-bg);border:none;border-radius:var(--radius-sm);padding:5px 10px;cursor:pointer;font-size:.75rem;color:var(--success-text);font-weight:600" onclick="acceptGroupInvite('${r.groupId}','${r.groupName}','${r.id}')">✓ Rejoindre</button>
+            <button style="background:var(--danger-bg);border:none;border-radius:var(--radius-sm);padding:5px 10px;cursor:pointer;font-size:.75rem;color:var(--danger-text);font-weight:600" onclick="declineFriendRequest('${r.id}')">✕</button>
+          </div>
+        </div>`;
+      return`
+        <div class="notif-item">
+          <div class="friend-avatar">${(r.fromPseudo[0]||'?').toUpperCase()}</div>
+          <div style="flex:1">
+            <div style="font-size:.85rem;font-weight:600;color:var(--text)">${r.fromPseudo}</div>
+            <div style="font-size:.72rem;color:var(--text3)">veut être ton ami</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button style="background:var(--success-bg);border:none;border-radius:var(--radius-sm);padding:5px 10px;cursor:pointer;font-size:.75rem;color:var(--success-text);font-weight:600" onclick="acceptFriendRequest('${r.from}','${r.fromPseudo}','${r.id}')">✓</button>
+            <button style="background:var(--danger-bg);border:none;border-radius:var(--radius-sm);padding:5px 10px;cursor:pointer;font-size:.75rem;color:var(--danger-text);font-weight:600" onclick="declineFriendRequest('${r.id}')">✕</button>
+          </div>
+        </div>`;
+    }).join('');
   }catch(e){ el.innerHTML=`<div style="color:var(--text3);font-size:.82rem;text-align:center">Erreur.</div>`; }
 }
 
@@ -2603,6 +2678,21 @@ async function acceptFriendRequest(fromUid, fromPseudo, reqId){
     renderFriendRequests(); loadFriendRequests();
   }catch(e){ showToast('Erreur.'); }
 }
+
+async function acceptGroupInvite(groupId,groupName,reqId){
+  const pseudo=currentUser?.displayName||currentUser?.email?.split('@')[0]||'Anonyme';
+  try{
+    const snap=await getDoc(doc(db,'groups',groupId));
+    if(!snap.exists()){showToast('Groupe introuvable.');return;}
+    const g=snap.data();
+    await setDoc(doc(db,'groups',groupId),{...g,members:{...g.members,[currentUser.uid]:{pseudo,joinedAt:new Date().toISOString(),xp,level}}});
+    await deleteDoc(doc(db,'friendRequests',currentUser.uid,'requests',reqId));
+    showToast(`✅ Tu as rejoint "${groupName}" !`);
+    renderFriendRequests(); loadFriendRequests();
+    switchTab('groups');
+  }catch(e){ showToast('Erreur.'); }
+}
+window.acceptGroupInvite=acceptGroupInvite;
 
 async function declineFriendRequest(reqId){
   try{
@@ -2625,22 +2715,29 @@ async function renderFriendsList(){
     const lbData={};
     lbSnap.forEach(d=>lbData[d.id]=d.data());
     const presSnap=await getDocs(collection(db,'presence'));
-    setTimeout(()=>{
-      el.innerHTML=friends.map(f=>{
-        const lb=lbData[f.uid]||{};
-        const isOnline=onlineUids.has(f.uid);
+    // Attendre que onlineUids soit peuplé
+    await new Promise(res=>onValue(dbRef(rtdb,'presence'),snap=>{
+      onlineUids=new Set(Object.keys(snap.val()||{}));
+      res();
+    },{onlyOnce:true}));
+    el.innerHTML=friends.map(f=>{
+      const lb=lbData[f.uid]||{};
+      const isOnline=onlineUids.has(f.uid);
         return`<div class="friend-item">
           <div class="friend-avatar">${(f.pseudo[0]||'?').toUpperCase()}
             <div class="${isOnline?'friend-online-dot':'friend-offline-dot'}"></div>
           </div>
           <div style="flex:1">
-            <div style="font-size:.85rem;font-weight:600;color:var(--text)">${f.pseudo}</div>
+            <div style="font-size:.85rem;font-weight:600;color:var(--text);cursor:pointer" onclick="viewUserProfile('${f.uid}','${f.pseudo}')">${f.pseudo}</div>
             <div style="font-size:.72rem;color:var(--text3)">Nv. ${lb.level||1} · ${(lb.xp||0).toLocaleString()} XP ${isOnline?'· <span style="color:var(--green);font-weight:600">En ligne</span>':''}</div>
           </div>
-          <button onclick="removeFriend('${f.uid}','${f.pseudo}')" style="background:var(--danger-bg);border:none;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:.7rem;color:var(--danger-text)">✕</button>
+          <div style="display:flex;gap:5px">
+            <button onclick="openPMChat('${f.uid}','${f.pseudo}')" style="background:var(--info-bg);border:1px solid var(--blue);border-radius:4px;padding:4px 8px;cursor:pointer;font-size:.7rem;color:var(--info-text);font-weight:600" title="Message privé">💬</button>
+            <button onclick="openInviteToGroup('${f.uid}','${f.pseudo}')" style="background:var(--success-bg);border:1px solid var(--green);border-radius:4px;padding:4px 8px;cursor:pointer;font-size:.7rem;color:var(--success-text);font-weight:600" title="Inviter dans un groupe">👥</button>
+            <button onclick="removeFriend('${f.uid}','${f.pseudo}')" style="background:var(--danger-bg);border:none;border-radius:4px;padding:4px 8px;cursor:pointer;font-size:.7rem;color:var(--danger-text)">✕</button>
+          </div>
         </div>`;
       }).join('');
-    },500);
   }catch(e){ el.innerHTML=`<div style="color:var(--text3);font-size:.82rem;text-align:center">Erreur.</div>`; }
 }
 
@@ -2746,6 +2843,133 @@ async function importFromLibrary(deckId){
 } window.openProfileModal=openProfileModal; window.closeProfileModal=closeProfileModal; window.saveProfile=saveProfile;
 window.switchProfileTab=switchProfileTab; window.searchFriend=searchFriend; window.sendFriendRequest=sendFriendRequest;
 window.acceptFriendRequest=acceptFriendRequest; window.declineFriendRequest=declineFriendRequest; window.removeFriend=removeFriend;
+
+// ── MESSAGES PRIVÉS ──
+let pmChatUid=null, pmChatPseudo=null, pmUnsubscribe=null, pmReplyingTo=null;
+
+function getPMConvId(uid1,uid2){ return [uid1,uid2].sort().join('_'); }
+
+function openPMChat(uid,pseudo){
+  pmChatUid=uid; pmChatPseudo=pseudo; pmReplyingTo=null;
+  document.getElementById('pm-avatar').textContent=(pseudo[0]||'?').toUpperCase();
+  document.getElementById('pm-name').textContent=pseudo;
+  document.getElementById('pm-status').textContent=onlineUids.has(uid)?'🟢 En ligne':'⚫ Hors ligne';
+  document.getElementById('pm-messages').innerHTML='<div style="text-align:center;padding:2rem;color:var(--text3)">Chargement…</div>';
+  document.getElementById('pm-input').value='';
+  cancelPMReply();
+  openModal('modal-private-chat');
+  if(pmUnsubscribe) pmUnsubscribe();
+  const convId=getPMConvId(currentUser.uid,uid);
+  import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js').then(({onSnapshot,query,orderBy,limit,collection:col})=>{
+    pmUnsubscribe=onSnapshot(
+      query(col(db,'privateMessages',convId,'messages'),orderBy('sentAt','asc'),limit(100)),
+      snap=>{ renderPMMessages(snap.docs.map(d=>({id:d.id,...d.data()}))); }
+    );
+  });
+}
+
+function closePMChat(){
+  if(pmUnsubscribe){pmUnsubscribe();pmUnsubscribe=null;}
+  pmChatUid=null; pmChatPseudo=null;
+  closeModal('modal-private-chat');
+}
+
+function renderPMMessages(messages){
+  const el=document.getElementById('pm-messages');
+  const wasAtBottom=el.scrollHeight-el.scrollTop-el.clientHeight<60;
+  if(!messages.length){ el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text3);font-size:.85rem">💬 Aucun message — dis bonjour !</div>'; return; }
+  const myUid=currentUser?.uid;
+  let lastDate=''; let lastUid=''; let html='';
+  messages.forEach(m=>{
+    const date=new Date(m.sentAt);
+    const dateStr=date.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    if(dateStr!==lastDate){ html+=`<div class="chat-date-sep">${dateStr}</div>`; lastDate=dateStr; lastUid=''; }
+    const isMe=m.uid===myUid;
+    const grouped=m.uid===lastUid;
+    const time=date.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const replyHtml=m.replyTo?`<div class="chat-bubble-reply">↩ ${m.replyTo.pseudo}: ${m.replyTo.text?.slice(0,50)}${m.replyTo.text?.length>50?'…':''}</div>`:'';
+    html+=`<div class="chat-msg${isMe?' me':''}${grouped?' grouped':''}" id="pm-${m.id}">
+      ${!isMe?`<div class="chat-avatar-sm">${(m.pseudo[0]||'?').toUpperCase()}</div>`:''}
+      <div class="chat-msg-content">
+        ${!grouped&&!isMe?`<div class="chat-meta">${m.pseudo} · ${time}</div>`:''}
+        ${grouped&&isMe?`<div class="chat-meta">${time}</div>`:''}
+        <div class="chat-bubble-wrap">
+          <div class="chat-msg-actions">
+            <button class="chat-action-btn" onclick="replyToPM('${m.id}','${m.pseudo}','${(m.text||'').replace(/'/g,"\\'").slice(0,60)}')" title="Répondre">↩</button>
+          </div>
+          <div class="chat-bubble">${replyHtml}${m.text}</div>
+        </div>
+      </div>
+    </div>`;
+    lastUid=m.uid;
+  });
+  el.innerHTML=html;
+  if(wasAtBottom) el.scrollTop=el.scrollHeight;
+}
+
+async function sendPMMessage(){
+  const input=document.getElementById('pm-input');
+  const text=input.value.trim();
+  if(!text||!pmChatUid)return;
+  const pseudo=currentUser?.displayName||currentUser?.email?.split('@')[0]||'Anonyme';
+  input.value=''; input.style.height='auto';
+  const msg={uid:currentUser.uid,pseudo,text,sentAt:new Date().toISOString()};
+  if(pmReplyingTo) msg.replyTo=pmReplyingTo;
+  cancelPMReply();
+  const convId=getPMConvId(currentUser.uid,pmChatUid);
+  import('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js').then(async({addDoc,collection:col})=>{
+    await addDoc(col(db,'privateMessages',convId,'messages'),msg);
+  });
+}
+
+function pmKeyDown(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendPMMessage();} }
+function pmInputChanged(){ const i=document.getElementById('pm-input'); i.style.height='auto'; i.style.height=Math.min(i.scrollHeight,120)+'px'; }
+function replyToPM(id,pseudo,text){ pmReplyingTo={id,pseudo,text}; document.getElementById('pm-reply-preview').classList.add('show'); document.getElementById('pm-reply-text').textContent=`${pseudo}: ${text}`; document.getElementById('pm-input').focus(); }
+function cancelPMReply(){ pmReplyingTo=null; document.getElementById('pm-reply-preview')?.classList.remove('show'); }
+
+// ── INVITATION GROUPE ──
+let inviteTargetUid=null, inviteTargetPseudo=null;
+
+async function openInviteToGroup(uid,pseudo){
+  inviteTargetUid=uid; inviteTargetPseudo=pseudo;
+  document.getElementById('invite-groups-list').innerHTML='<div style="text-align:center;padding:1rem;color:var(--text3)">Chargement…</div>';
+  openModal('modal-invite-group');
+  try{
+    const snap=await getDocs(collection(db,'groups'));
+    const myGroups=[];
+    snap.forEach(d=>{ const g=d.data(); if(g.members?.[currentUser.uid]&&!g.members?.[uid]) myGroups.push(g); });
+    if(!myGroups.length){ document.getElementById('invite-groups-list').innerHTML='<div style="text-align:center;padding:1rem;color:var(--text3);font-size:.82rem">Aucun groupe disponible.<br>Crée un groupe d\'abord !</div>'; return; }
+    document.getElementById('invite-groups-list').innerHTML=myGroups.map(g=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px">
+        <div>
+          <div style="font-size:.85rem;font-weight:600;color:var(--text)">${g.name}</div>
+          <div style="font-size:.72rem;color:var(--text3)">${Object.keys(g.members||{}).length} membres</div>
+        </div>
+        <button class="primary" style="font-size:.75rem;padding:5px 12px" onclick="sendGroupInvite('${g.id}','${g.name}')">Inviter</button>
+      </div>`).join('');
+  }catch(e){ document.getElementById('invite-groups-list').innerHTML='<div style="text-align:center;color:var(--text3)">Erreur.</div>'; }
+}
+
+async function sendGroupInvite(groupId,groupName){
+  if(!inviteTargetUid)return;
+  const myPseudo=currentUser?.displayName||currentUser?.email?.split('@')[0]||'Anonyme';
+  try{
+    await setDoc(doc(db,'friendRequests',inviteTargetUid,'requests',`inv_${groupId}`),{
+      type:'groupInvite',
+      from:currentUser.uid, fromPseudo:myPseudo,
+      to:inviteTargetUid, toPseudo:inviteTargetPseudo,
+      groupId, groupName,
+      sentAt:new Date().toISOString(), status:'pending'
+    });
+    closeModal('modal-invite-group');
+    showToast(`✅ Invitation envoyée à ${inviteTargetPseudo} !`);
+  }catch(e){ showToast('Erreur lors de l\'envoi.'); }
+}
+
+window.openPMChat=openPMChat; window.closePMChat=closePMChat; window.sendPMMessage=sendPMMessage;
+window.pmKeyDown=pmKeyDown; window.pmInputChanged=pmInputChanged;
+window.replyToPM=replyToPM; window.cancelPMReply=cancelPMReply;
+window.openInviteToGroup=openInviteToGroup; window.sendGroupInvite=sendGroupInvite;
 function escHtml(s){ return s?String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])):''; } window.renderLeaderboard = renderLeaderboard;
 function generateGroupCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code='BLK-'; for(let i=0;i<4;i++) code+=chars[Math.floor(Math.random()*chars.length)]; return code; }
 
@@ -2805,7 +3029,7 @@ async function renderGroups(){
       const membersHtml=members.map(m=>`
         <div class="group-member">
           <div class="group-avatar">${(m.pseudo[0]||'?').toUpperCase()}</div>
-          <div style="flex:1;font-size:.82rem;color:var(--text)">${m.pseudo}${m.pseudo===(currentUser?.displayName||currentUser?.email?.split('@')[0])?' (toi)':''}</div>
+          <div style="flex:1;font-size:.82rem;color:var(--text);cursor:pointer" onclick="viewUserProfile('${m.uid||''}','${m.pseudo}')">${m.pseudo}${m.pseudo===(currentUser?.displayName||currentUser?.email?.split('@')[0])?' (toi)':''}</div>
           <div style="font-size:.72rem;color:var(--text3)">Nv.${m.level||1} · ${(m.xp||0).toLocaleString()} XP</div>
         </div>`).join('');
       const isOwner=g.createdBy===currentUser.uid;
@@ -3089,7 +3313,77 @@ function watchOnlineStatus(){
 }
 function isOnline(uid){ return onlineUids.has(uid); }
 
-window.openChatModal=openChatModal; window.closeChatModal=closeChatModal; window.sendChatMessage=sendChatMessage; window.chatKeyDown=chatKeyDown;
+async function viewUserProfile(uid, pseudo){
+  const modal=document.createElement('div');
+  modal.id='user-profile-view';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)';
+  modal.innerHTML=`<div style="background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);width:420px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:slideUp .2s ease">
+    <div style="display:flex;align-items:center;gap:14px;padding:1.2rem;border-bottom:1px solid var(--border)">
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-size:1.3rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${(pseudo[0]||'?').toUpperCase()}</div>
+      <div style="flex:1">
+        <div style="font-size:1rem;font-weight:700;color:var(--text)">${pseudo}</div>
+        <div style="font-size:.72rem;color:var(--text3);margin-top:2px" id="uvp-status">${onlineUids.has(uid)?'🟢 En ligne':'⚫ Hors ligne'}</div>
+      </div>
+      <button onclick="document.getElementById('user-profile-view').remove()" style="background:var(--bg3);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:.9rem;color:var(--text2)">✕</button>
+    </div>
+    <div id="uvp-body" style="padding:1.2rem"><div style="text-align:center;color:var(--text3);font-size:.82rem">Chargement…</div></div>
+  </div>`;
+  document.body.appendChild(modal);
+
+  try{
+    // Charger profil
+    const profSnap=await getDoc(doc(db,'users',uid,'data','profile'));
+    const prof=profSnap.exists()?profSnap.data():{};
+    // Charger leaderboard
+    const lbSnap=await getDoc(doc(db,'leaderboard',uid));
+    const lb=lbSnap.exists()?lbSnap.data():{};
+
+    if(prof.privacy?.public===false){
+      document.getElementById('uvp-body').innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text3)">🔒 Ce profil est privé.</div>';
+      return;
+    }
+
+    let html='';
+
+    // Stats si autorisées
+    if(prof.privacy?.stats!==false){
+      html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem">
+        <div class="profile-stat"><div class="profile-stat-val">LVL ${lb.level||1}</div><div class="profile-stat-lbl">Niveau</div></div>
+        <div class="profile-stat"><div class="profile-stat-val">${(lb.xp||0).toLocaleString()}</div><div class="profile-stat-lbl">XP total</div></div>
+      </div>`;
+    }
+
+    // Infos profil
+    if(prof.school||prof.studies||prof.year||prof.bio){
+      html+=`<div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:.5rem">`;
+      if(prof.school) html+=`<div style="font-size:.8rem;color:var(--text2);margin-bottom:5px">🏫 <strong>${prof.school}</strong></div>`;
+      if(prof.studies) html+=`<div style="font-size:.8rem;color:var(--text2);margin-bottom:5px">📖 ${prof.studies}${prof.year?' — '+prof.year:''}</div>`;
+      if(prof.bio) html+=`<div style="font-size:.82rem;color:var(--text2);background:var(--bg2);border-radius:var(--radius-sm);padding:8px 10px;margin-top:6px;line-height:1.6;border-left:3px solid var(--blue)">${prof.bio}</div>`;
+      html+=`</div>`;
+    }
+
+    // Badges si autorisés
+    if(prof.privacy?.badges!==false && earnedBadges){
+      const badgeSnap=await getDoc(doc(db,'users',uid,'data','main'));
+      if(badgeSnap.exists()&&badgeSnap.data().earnedBadges?.length){
+        const theirBadges=new Set(badgeSnap.data().earnedBadges);
+        const visibleBadges=BADGE_DEFS.filter(b=>theirBadges.has(b.id)).slice(0,10);
+        if(visibleBadges.length){
+          html+=`<div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:.5rem">
+            <div style="font-size:.72rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">🏆 Badges</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">${visibleBadges.map(b=>`<div title="${b.name}" style="font-size:1.3rem;cursor:default">${b.ico}</div>`).join('')}</div>
+          </div>`;
+        }
+      }
+    }
+
+    if(!html) html='<div style="text-align:center;padding:1rem;color:var(--text3);font-size:.82rem">Aucune information publique.</div>';
+    document.getElementById('uvp-body').innerHTML=html;
+  }catch(e){
+    document.getElementById('uvp-body').innerHTML='<div style="text-align:center;color:var(--text3)">Erreur de chargement.</div>';
+  }
+}
+window.viewUserProfile=viewUserProfile; window.closeChatModal=closeChatModal; window.sendChatMessage=sendChatMessage; window.chatKeyDown=chatKeyDown;
 window.toggleReaction=toggleReaction; window.pinMessage=pinMessage; window.replyTo=replyTo; window.cancelReply=cancelReply;
 window.scrollToPinned=scrollToPinned; window.scrollToMessage=scrollToMessage;
 window.toggleEmojiPicker=toggleEmojiPicker; window.insertEmoji=insertEmoji;
@@ -3230,7 +3524,7 @@ if(tp==='progress'){renderProgress();renderProgChart();renderAgenda();} if(tp===
 if(tp==='journal')renderJournal(); if(tp==='study')renderStudy(); bubbleHidden=false;if(timerOn)updateBubble(true,false); }
 function setView(v){ viewMode=v; document.getElementById('vt-week').classList.toggle('active',v==='week'); document.getElementById('vt-month').classList.toggle('active',v==='month'); document.getElementById('view-week').style.display=v==='week'?'block':'none'; document.getElementById('view-month').style.display=v==='month'?'block':'none'; document.getElementById('overload-section').style.display=v==='week'?'block':'none'; renderPlanning(); }
 function changeNav(d){if(viewMode==='week')wkOff+=d;else mthOff+=d;renderPlanning();}
-function goToToday(){ wkOff=0; mthOff=0; renderPlanning(); showToast('📍 Semaine actuelle'); }
+function goToToday(){ TODAY=new Date(); TODAY.setHours(0,0,0,0); wkOff=0; mthOff=0; renderPlanning(); showToast('📍 Semaine actuelle'); }
 const toggleDark=()=>{darkMode=!darkMode;document.body.classList.toggle('dark',darkMode);document.getElementById('dark-btn').textContent=darkMode?'☀️':'🌙';scheduleSave();};
 
 function renderPreblocks(){
@@ -3343,7 +3637,16 @@ el.innerHTML=`${n>1?'<div class="conflict-dot"></div>':''}${srDue?'<div class="s
 el.addEventListener('dragstart',e=>{dragData={type:'move',id:b.id};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text','m');});
 el.addEventListener('contextmenu',e=>{e.preventDefault();showCtx(e,b.id);}); col.appendChild(el); }); outer.appendChild(col); } wrapper.appendChild(outer); renderOverload('overload-bar'); }
 
-function onDrop(day,slotDec){ if(!dragData)return; pushUndo(); const snapped=Math.round(slotDec*4)/4; if(dragData.type==='move'){const b=blocks.find(x=>x.id===dragData.id);if(b){b.day=day;b.hour=snapped;b.weekOffset=wkOff;}} else if(dragData.type==='pre'){const s=subjects.find(x=>x.id===dragData.subjId);blocks.push({id:nid++,type:'rev',subj:dragData.subjId,day,weekOffset:wkOff,hour:snapped,dur:2,status:'todo',task:''});if(s)s.totalBlocks++;} else if(dragData.type==='prepause'){blocks.push({id:nid++,type:'pause',day,weekOffset:wkOff,hour:snapped,dur:dragData.dur,label:dragData.label});} dragData=null;renderWeek();scheduleSave(); }
+function onDrop(day,slotDec){ if(!dragData)return; pushUndo();
+  const snapped=Math.round(slotDec*4)/4;
+  const ws=getWeekStart(wkOff);
+  const dropDate=new Date(ws); dropDate.setDate(ws.getDate()+day);
+  const dateStr=dateToISO(dropDate);
+  if(dragData.type==='move'){const b=blocks.find(x=>x.id===dragData.id);if(b){b.dateStr=dateStr;b.day=day;b.weekOffset=wkOff;b.hour=snapped;}}
+  else if(dragData.type==='pre'){const s=subjects.find(x=>x.id===dragData.subjId);blocks.push({id:nid++,type:'rev',subj:dragData.subjId,dateStr,day,weekOffset:wkOff,hour:snapped,dur:2,status:'todo',task:''});if(s)s.totalBlocks++;}
+  else if(dragData.type==='prepause'){blocks.push({id:nid++,type:'pause',dateStr,day,weekOffset:wkOff,hour:snapped,dur:dragData.dur,label:dragData.label});}
+  dragData=null;renderWeek();scheduleSave();
+}
 function quickToggle(id){ pushUndo(); const b=blocks.find(x=>x.id===id);if(!b||b.type!=='rev')return; b.status=b.status==='done'?'todo':'done'; recalc(b.subj); renderWeek();scheduleSave(); checkBadges(); }
 function recalc(sid){ const s=subjects.find(x=>x.id===sid);if(!s)return; s.doneBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===sid&&b.status==='done').length; s.totalBlocks=Math.max(s.doneBlocks,blocks.filter(b=>b.type==='rev'&&b.subj===sid).length); }
 
@@ -3355,7 +3658,7 @@ function renderPlanning(){renderPreblocks();if(viewMode==='week')renderWeek();el
 
 function printPlanning(){ const ws=getWeekStart(wkOff),we=new Date(ws);we.setDate(ws.getDate()+6); document.getElementById('print-header').textContent=`📅 Blokly Study — Semaine du ${fmt(ws)} au ${fmt(we)}`; if(viewMode!=='week'){ setView('week'); } window.print(); }
 
-function renderAgenda(){ const el=document.getElementById('agenda-list'); const todo=blocks.filter(b=>b.type==='rev'&&b.status==='todo').sort((a,b)=>(a.weekOffset*7+a.day)*100+a.hour-(b.weekOffset*7+b.day)*100-b.hour); if(!todo.length){el.innerHTML='<div style="color:var(--text3);font-size:.82rem;text-align:center;padding:1.5rem">🎉 Aucun bloc à faire !</div>';return;} el.innerHTML=todo.map(b=>{const s=subjects.find(x=>x.id===b.subj);const ws=getWeekStart(b.weekOffset);const dd=new Date(ws);dd.setDate(ws.getDate()+b.day);return`<div class="agenda-item"><div class="agenda-dot" style="background:${s?s.color:'#888'}"></div><div class="agenda-time">${DAYS_FR[b.day]} ${fmt(dd)}<br>${hm(b.hour)}–${hm(b.hour+b.dur)}</div><div style="flex:1"><div class="agenda-name">${s?s.name:'?'}</div>${b.task?`<div class="agenda-task">${b.task}</div>`:''}</div><button onclick="quickToggle(${b.id});renderAgenda()" style="background:var(--success-bg);border:none;border-radius:4px;padding:4px 9px;cursor:pointer;font-size:.75rem;color:var(--success-text);font-weight:600">✓</button></div>`;}).join(''); }
+function renderAgenda(){ const el=document.getElementById('agenda-list'); const todo=blocks.filter(b=>b.type==='rev'&&b.status==='todo').sort((a,b)=>blockDateStr(a).localeCompare(blockDateStr(b))||a.hour-b.hour); if(!todo.length){el.innerHTML='<div style="color:var(--text3);font-size:.82rem;text-align:center;padding:1.5rem">🎉 Aucun bloc à faire !</div>';return;} el.innerHTML=todo.map(b=>{const s=subjects.find(x=>x.id===b.subj);const dd=blockDate(b);return`<div class="agenda-item"><div class="agenda-dot" style="background:${s?s.color:'#888'}"></div><div class="agenda-time">${DAYS_FR[b.day]} ${fmt(dd)}<br>${hm(b.hour)}–${hm(b.hour+b.dur)}</div><div style="flex:1"><div class="agenda-name">${s?s.name:'?'}</div>${b.task?`<div class="agenda-task">${b.task}</div>`:''}</div><button onclick="quickToggle(${b.id});renderAgenda()" style="background:var(--success-bg);border:none;border-radius:4px;padding:4px 9px;cursor:pointer;font-size:.75rem;color:var(--success-text);font-weight:600">✓</button></div>`;}).join(''); }
 
 function showCtx(e,id){ctxId=id;const m=document.getElementById('ctx');m.style.display='block';m.style.left=Math.min(e.clientX,window.innerWidth-210)+'px';m.style.top=Math.min(e.clientY,window.innerHeight-160)+'px';}
 function hideCtx(){document.getElementById('ctx').style.display='none';ctxId=null;}
@@ -3368,7 +3671,20 @@ document.getElementById('b-status').value=b.status||'todo';
 document.getElementById('b-task').value=b.task||'';
 renderBlockChapters();
 document.getElementById('modal-block').classList.add('open'); }
-function ctxMove(){ const b=blocks.find(x=>x.id===ctxId);if(!b){hideCtx();return;} pushUndo(); for(let d=b.day;d<7;d++){const startH=Math.max(6,b.hour);for(let h=startH;h<=24-b.dur;h++){const conflict=blocks.find(x=>x.type==='rev'&&x.day===d&&x.weekOffset===wkOff&&x.id!==b.id&&!(x.hour+x.dur<=h||h+b.dur<=x.hour));if(!conflict){b.day=d;b.hour=h;b.weekOffset=wkOff;hideCtx();renderWeek();scheduleSave();return;}}} hideCtx();showToast('Aucun créneau libre trouvé.'); }
+function ctxMove(){ const b=blocks.find(x=>x.id===ctxId);if(!b){hideCtx();return;} pushUndo();
+  for(let d=b.day;d<7;d++){
+    const startH=Math.max(6,b.hour);
+    for(let h=startH;h<=24-b.dur;h++){
+      const conflict=blocks.find(x=>x.type==='rev'&&x.day===d&&x.weekOffset===wkOff&&x.id!==b.id&&!(x.hour+x.dur<=h||h+b.dur<=x.hour));
+      if(!conflict){
+        const ws=getWeekStart(wkOff); const dd=new Date(ws); dd.setDate(ws.getDate()+d);
+        b.day=d;b.hour=h;b.weekOffset=wkOff;b.dateStr=dateToISO(dd);
+        hideCtx();renderWeek();scheduleSave();return;
+      }
+    }
+  }
+  hideCtx();showToast('Aucun créneau libre trouvé.');
+}
 function ctxDeleteConfirm(){ const bid=ctxId;hideCtx(); showConfirm('🗑 Supprimer ce bloc ?','',()=>{ pushUndo(); blocks=blocks.filter(x=>x.id!==bid); renderPlanning();scheduleSave(); }); }
 function showConfirm(title,msg,onOk){ document.getElementById('confirm-title').textContent=title; document.getElementById('confirm-msg').textContent=msg; confirmCallback=onOk; document.getElementById('confirm-ok-btn').onclick=()=>{closeModal('modal-confirm');if(confirmCallback)confirmCallback();}; document.getElementById('modal-confirm').classList.add('open'); }
 
@@ -3425,11 +3741,14 @@ function saveBlock(){
   pushUndo();
   if(editId!==null){
     const b=blocks.find(x=>x.id===editId);
-    if(b){Object.assign(b,{subj:sid,day,hour,dur,status,task,chapIndices});}
+    if(b){
+      const ws=getWeekStart(wkOff); const dd=new Date(ws); dd.setDate(ws.getDate()+day);
+      Object.assign(b,{subj:sid,day,hour,dur,status,task,chapIndices,dateStr:dateToISO(dd),weekOffset:wkOff});
+    }
   } else {
-    const weeks=repeat?4:1;
-    for(let w=0;w<weeks;w++) blocks.push({id:nid++,type:'rev',subj:sid,day,weekOffset:wkOff+w,hour,dur,status,task,chapIndices});
-    const s=subjects.find(x=>x.id===sid);if(s)s.totalBlocks+=(repeat?4:1);
+    const ws=getWeekStart(wkOff); const dd=new Date(ws); dd.setDate(ws.getDate()+day);
+    blocks.push({id:nid++,type:'rev',subj:sid,day,weekOffset:wkOff,dateStr:dateToISO(dd),hour,dur,status,task,chapIndices});
+    const s=subjects.find(x=>x.id===sid);if(s)s.totalBlocks++;
   }
   closeModal('modal-block');renderPlanning();scheduleSave();
 }
@@ -3906,7 +4225,7 @@ function onModeChange(){
   resetTimer();
 }
 function resetTimer(){ if(timerIv){clearInterval(timerIv);timerIv=null;}timerOn=false; timerSessionElapsed=0; setPresenceActive(false); const m=document.getElementById('study-mode')?.value||'custom'; const durRaw=document.getElementById('study-dur')?.value; const durSel=durRaw==='custom'?parseInt(document.getElementById('study-dur-custom')?.value||45)||45:parseInt(durRaw||45); if(m==='pomodoro'){timerTotal=25*60;pomoPhase='work';}else if(m==='pomodoro50'){timerTotal=50*60;pomoPhase='work';}else timerTotal=durSel*60; timerLeft=timerTotal; document.getElementById('timer-disp').textContent=hms(timerLeft); document.getElementById('focus-time-big').textContent=hms(timerLeft); document.getElementById('timer-lbl').textContent='prêt'; document.getElementById('btn-start').textContent='▶ Démarrer'; document.getElementById('focus-btn-start').textContent='▶ Démarrer'; document.getElementById('sdot').style.animation=''; updateBubble(false); updateRing(); updateXPPreview(); }
-function timerToggle(){ if(timerOn){ clearInterval(timerIv);timerIv=null;timerOn=false; setPresenceActive(false); document.getElementById('btn-start').textContent='▶ Reprendre'; document.getElementById('focus-btn-start').textContent='▶ Reprendre'; document.getElementById('timer-lbl').textContent='pause'; document.getElementById('sdot').style.animation='pulse 1.4s infinite'; document.getElementById('bubble-dot').classList.add('paused'); } else { if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} timerOn=true; setPresenceActive(true); const h=new Date().getHours(); if(h>=22) _nightOwlUnlocked=true; document.getElementById('btn-start').textContent='⏸ Pause'; document.getElementById('focus-btn-start').textContent='⏸ Pause'; document.getElementById('timer-lbl').textContent='en cours'; document.getElementById('sdot').style.animation=''; document.getElementById('bubble-dot').classList.remove('paused'); updateBubble(true,false); timerIv=setInterval(timerTick,1000); } }
+function timerToggle(){ if(timerOn){ clearInterval(timerIv);timerIv=null;timerOn=false; setPresenceActive(false); document.getElementById('btn-start').textContent='▶ Reprendre'; document.getElementById('focus-btn-start').textContent='▶ Reprendre'; document.getElementById('timer-lbl').textContent='pause'; document.getElementById('sdot').style.animation='pulse 1.4s infinite'; document.getElementById('bubble-dot').classList.add('paused'); } else { if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} timerOn=true; if(userProfile.privacy?.online!==false) setPresenceActive(true); const h=new Date().getHours(); if(h>=22) _nightOwlUnlocked=true; document.getElementById('btn-start').textContent='⏸ Pause'; document.getElementById('focus-btn-start').textContent='⏸ Pause'; document.getElementById('timer-lbl').textContent='en cours'; document.getElementById('sdot').style.animation=''; document.getElementById('bubble-dot').classList.remove('paused'); updateBubble(true,false); timerIv=setInterval(timerTick,1000); } }
 function timerTick(){ timerLeft--;timerSessionElapsed++; if(timerLeft<=0){timerEnd();return;} document.getElementById('timer-disp').textContent=hms(timerLeft); document.getElementById('focus-time-big').textContent=hms(timerLeft); document.getElementById('bubble-time').textContent=hms(timerLeft); updateRing(); }
 function timerEnd(){ 
   clearInterval(timerIv);timerIv=null;timerOn=false; 
@@ -4106,13 +4425,22 @@ function openTemplates(){ showTplTab('presets'); openModal('modal-templates'); }
 function showTplTab(tab){ document.getElementById('tpl-presets-panel').style.display=tab==='presets'?'block':'none'; document.getElementById('tpl-saved-panel').style.display=tab==='saved'?'block':'none'; document.getElementById('tpl-tab-presets').classList.toggle('active',tab==='presets'); document.getElementById('tpl-tab-saved').classList.toggle('active',tab==='saved'); if(tab==='saved') renderSavedTemplates(); }
 function renderSavedTemplates(){ const el=document.getElementById('tpl-saved-list'); if(!savedTemplates.length){ el.innerHTML='<div style="color:var(--text3);font-size:.82rem;text-align:center;padding:1rem">Aucun template sauvegardé.<br>Organise ta semaine et sauvegarde-la ci-dessus.</div>'; return; } el.innerHTML=savedTemplates.map((t,i)=>`<div class="tpl-saved-item"><div style="font-size:1.2rem">📋</div><div style="flex:1"><div class="tpl-saved-name">${t.name}</div><div class="tpl-saved-meta">${t.blocks.length} bloc(s) · Créé le ${t.createdAt||'—'}</div></div><button class="primary" style="font-size:.72rem;padding:5px 10px" onclick="applyNamedTemplate(${i})">Appliquer</button><button class="ghost" style="font-size:.72rem;padding:5px 8px;color:var(--danger-text)" onclick="deleteNamedTemplate(${i})">🗑</button></div>`).join(''); }
 function saveCurrentWeekAsTemplate(){ const nameEl=document.getElementById('tpl-save-name'); const name=nameEl.value.trim(); if(!name){showToast('Donne un nom au template.');return;} const weekBlocks=blocks.filter(b=>b.weekOffset===wkOff); if(!weekBlocks.length){showToast('Aucun bloc dans la semaine actuelle.');return;} const normalized=weekBlocks.map(b=>({type:b.type,subj:b.subj||null,day:b.day,hour:b.hour,dur:b.dur,status:'todo',task:b.task||'',label:b.label||''})); savedTemplates.push({name,blocks:normalized,createdAt:new Date().toLocaleDateString('fr-FR')}); nameEl.value=''; renderSavedTemplates(); scheduleSave(); showToast('✅ Template "'+name+'" sauvegardé !'); }
-function applyNamedTemplate(idx){ const tpl=savedTemplates[idx]; if(!tpl)return; pushUndo(); tpl.blocks.forEach(b=>{ const nb={id:nid++,type:b.type,day:b.day,weekOffset:wkOff,hour:b.hour,dur:b.dur,status:'todo',task:b.task||''}; if(b.type==='rev')nb.subj=b.subj; if(b.type==='pause')nb.label=b.label||'Pause'; blocks.push(nb); }); subjects.forEach(s=>{s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length;}); closeModal('modal-templates'); renderPlanning(); scheduleSave(); showToast('📋 Template "'+tpl.name+'" appliqué !'); }
+function applyNamedTemplate(idx){ const tpl=savedTemplates[idx]; if(!tpl)return; pushUndo(); tpl.blocks.forEach(b=>{
+  const ws=getWeekStart(wkOff); const dd=new Date(ws); dd.setDate(ws.getDate()+(b.day||0));
+  const nb={id:nid++,type:b.type,day:b.day||0,weekOffset:wkOff,dateStr:dateToISO(dd),hour:b.hour,dur:b.dur,status:'todo',task:b.task||''};
+  if(b.type==='rev')nb.subj=b.subj; if(b.type==='pause')nb.label=b.label||'Pause'; blocks.push(nb);
+}); subjects.forEach(s=>{s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length;}); closeModal('modal-templates'); renderPlanning(); scheduleSave(); showToast('📋 Template "'+tpl.name+'" appliqué !'); }
 function deleteNamedTemplate(idx){ showConfirm('🗑 Supprimer ce template ?','',()=>{ savedTemplates.splice(idx,1); renderSavedTemplates(); scheduleSave(); showToast('Template supprimé.'); }); }
-function applyPresetTemplate(t){ if(!subjects.length){showToast('Ajoute d\'abord des matières.');closeModal('modal-templates');return;} pushUndo(); const slots={light:[[9,2],[14,2]],normal:[[8,2],[13,2],[17,2]],intensive:[[8,2],[11,2],[14,2],[17,2]]}; const s=slots[t]||slots['normal']; let added=0; for(let d=0;d<5;d++){s.forEach(([h,dur])=>{const sid=subjects[added%subjects.length].id;blocks.push({id:nid++,type:'rev',subj:sid,day:d,weekOffset:wkOff,hour:h,dur,status:'todo',task:''});added++;});} subjects.forEach(s=>{s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length;}); closeModal('modal-templates');renderPlanning();scheduleSave();showToast('📋 Template prédéfini appliqué !'); }
+function applyPresetTemplate(t){ if(!subjects.length){showToast('Ajoute d\'abord des matières.');closeModal('modal-templates');return;} pushUndo(); const slots={light:[[9,2],[14,2]],normal:[[8,2],[13,2],[17,2]],intensive:[[8,2],[11,2],[14,2],[17,2]]}; const s=slots[t]||slots['normal']; let added=0; for(let d=0;d<5;d++){s.forEach(([h,dur])=>{const sid=subjects[added%subjects.length].id;const ws2=getWeekStart(wkOff); const dd2=new Date(ws2); dd2.setDate(ws2.getDate()+d);
+blocks.push({id:nid++,type:'rev',subj:sid,day:d,weekOffset:wkOff,dateStr:dateToISO(dd2),hour:h,dur,status:'todo',task:''});added++;});} subjects.forEach(s=>{s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length;}); closeModal('modal-templates');renderPlanning();scheduleSave();showToast('📋 Template prédéfini appliqué !'); }
 function applyTemplate(t){ applyPresetTemplate(t); }
 
 function runExpress(){ if(!subjects.length){showToast('Ajoute d\'abord des matières.');return;} const list=document.getElementById('express-list'); list.innerHTML=subjects.map(s=>{if(!s.date)return'';const d=Math.max(0,Math.ceil((new Date(s.date)-TODAY)/86400000));return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><div class="dot" style="background:${s.color}"></div><div style="flex:1"><div style="font-size:.85rem;font-weight:600;color:var(--text)">${s.name}</div><div style="font-size:.75rem;color:var(--text3)">${d}j restants</div></div></div>`;}).join(''); expressBlocks=subjects.filter(s=>s.date).sort((a,b)=>new Date(a.date)-new Date(b.date)); openModal('modal-express'); }
-function applyExpress(){ if(!expressBlocks.length){closeModal('modal-express');return;} pushUndo(); expressBlocks.forEach((s,i)=>{ const d=Math.max(0,Math.ceil((new Date(s.date)-TODAY)/86400000)); const priority=d<7?3:d<14?2:1; for(let w=0;w<Math.min(priority,2);w++){blocks.push({id:nid++,type:'rev',subj:s.id,day:i%5,weekOffset:wkOff+w,hour:9+i*2%8,dur:2,status:'todo',task:'Express'});} s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length; }); closeModal('modal-express');renderPlanning();scheduleSave();showToast('⚡ Planning express appliqué !'); }
+function applyExpress(){ if(!expressBlocks.length){closeModal('modal-express');return;} pushUndo(); expressBlocks.forEach((s,i)=>{ const d=Math.max(0,Math.ceil((new Date(s.date)-TODAY)/86400000)); const priority=d<7?3:d<14?2:1; for(let w=0;w<Math.min(priority,2);w++){
+  const day=i%5;
+  const ws=getWeekStart(wkOff+w); const dd=new Date(ws); dd.setDate(ws.getDate()+day);
+  blocks.push({id:nid++,type:'rev',subj:s.id,day,weekOffset:wkOff+w,dateStr:dateToISO(dd),hour:9+i*2%8,dur:2,status:'todo',task:'Express'});
+} s.totalBlocks=blocks.filter(b=>b.type==='rev'&&b.subj===s.id).length; }); closeModal('modal-express');renderPlanning();scheduleSave();showToast('⚡ Planning express appliqué !'); }
 
 function exportJSON(){ const data={subjects,blocks,journalEntries,srData,savedTemplates,heatData,flashcards,streak,xp,level,unlockedThemes,currentTheme,earnedBadges:[...earnedBadges]}; const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='blokly_v24.json';a.click(); }
 function importJSON(evt){ const file=evt.target.files[0];if(!file)return; const reader=new FileReader(); reader.onload=e=>{ try{ const d=JSON.parse(e.target.result); if(d.subjects)subjects=d.subjects;if(d.blocks)blocks=d.blocks; if(d.journalEntries)journalEntries=d.journalEntries;if(d.srData)srData=d.srData; if(d.flashcards)flashcards=d.flashcards;if(d.heatData)heatData=d.heatData; if(d.xp!==undefined)xp=d.xp;if(d.level!==undefined)level=d.level; if(d.unlockedThemes)unlockedThemes=d.unlockedThemes; if(d.earnedBadges)earnedBadges=new Set(d.earnedBadges); nid=safeMaxId(subjects.map(s=>s.id),blocks.map(b=>b.id)); scheduleSave();renderPlanning();renderExams();updateXPBar();showToast('✅ Import réussi !'); }catch(ex){showToast('❌ Fichier invalide.');} }; reader.readAsText(file);evt.target.value=''; }
