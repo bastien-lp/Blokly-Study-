@@ -1999,7 +1999,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
     <p id="confirm-msg" style="font-size:.85rem;color:var(--text2);margin-bottom:1rem"></p>
     <div class="brow" style="justify-content:center">
       <button class="ghost" onclick="closeModal('modal-confirm')">Annuler</button>
-      <button class="danger-btn" id="confirm-ok-btn">Supprimer</button>
+      <button class="primary" id="confirm-ok-btn">Confirmer</button>
     </div>
   </div>
 </div>
@@ -2393,7 +2393,7 @@ async function saveToCloud(){ if(!currentUser)return; setSyncState('syncing'); t
   totalFocusHours,lastStudyDate,weekLongSessions,_totalSRValidated,
   xpToday,xpThisWeek,lastXPDateDay,lastXPDateWeek,
   updatedAt:new Date().toISOString()
-}); await saveTemplatesToCloud(); setSyncState('ok'); }catch(e){console.error('saveToCloud:',e);setSyncState('error');} }
+}); await saveTemplatesToCloud(); setSyncState('ok'); }catch(e){console.error('saveToCloud:',e); if(e.code!=='unavailable') setSyncState('error');} }
 async function saveTemplatesToCloud(){ if(!currentUser)return; try{ await setDoc(doc(db,'users',currentUser.uid,'data','templates'),{savedTemplates,updatedAt:new Date().toISOString()}); }catch(e){} }
 async function loadFromCloud(){ if(!currentUser)return false; setSyncState('syncing'); try{ const snap=await getDoc(doc(db,'users',currentUser.uid,'data','main')); if(!snap.exists()){setSyncState('ok');return false;} const d=snap.data(); if(d.subjects)subjects=d.subjects; if(d.blocks)blocks=d.blocks; if(d.journalEntries)journalEntries=d.journalEntries; if(d.srData)srData=d.srData; if(d.heatData?.length)heatData=d.heatData; if(d.flashcards)flashcards=d.flashcards; if(d.streak!==undefined)streak=d.streak; if(d.todaySess!==undefined)todaySess=d.todaySess; if(d.todayMins!==undefined)todayMins=d.todayMins; if(d.darkMode!==undefined)darkMode=d.darkMode; if(d.nid)nid=d.nid; if(d.xp!==undefined)xp=d.xp; if(d.level!==undefined)level=d.level; if(d.unlockedThemes)unlockedThemes=d.unlockedThemes; if(d.currentTheme)currentTheme=d.currentTheme; if(d.earnedBadges)earnedBadges=new Set(d.earnedBadges);
 if(d.totalFocusHours!==undefined)totalFocusHours=d.totalFocusHours;
@@ -2500,7 +2500,7 @@ const filtered=leaderboardTab==='today'
   : rows;
 filtered.sort((a,b)=>(b[sortKey]||0)-(a[sortKey]||0));
 const top=filtered.slice(0,20);
-const rows2=filtered; const medals=['🥇','🥈','🥉']; wrap.innerHTML=top.length===0?`<div style="text-align:center;padding:1.5rem;color:var(--text3)">Aucun joueur pour l'instant.</div>`:top.map((r,i)=>{ const isMe=r.uid===currentUser?.uid; const xpVal=r[sortKey]||0; const medal=i<3?medals[i]:`<span style="font-size:.75rem;color:var(--text3)">#${i+1}</span>`; return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);background:${isMe?'rgba(74,144,217,.12)':'transparent'};border:${isMe?'1px solid rgba(74,144,217,.3)':'1px solid transparent'};margin-bottom:4px"><div style="width:28px;text-align:center;font-size:1.1rem">${medal}</div><div style="flex:1;min-width:0"><div style="font-size:.85rem;font-weight:${isMe?700:500};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${isMe?'⭐ ':''} ${r.pseudo||'?'}</div><div style="font-size:.72rem;color:var(--text3)">Nv. ${r.level||1}</div></div><div style="font-size:.88rem;font-weight:700;color:var(--xp-color)">${xpVal.toLocaleString()} XP</div></div>`; }).join(''); // Stats comparatives
+const rows2=filtered; const medals=['🥇','🥈','🥉']; wrap.innerHTML=top.length===0?`<div style="text-align:center;padding:1.5rem;color:var(--text3)">Aucun joueur pour l'instant.</div>`:top.map((r,i)=>{ const isMe=r.uid===currentUser?.uid; const xpVal=r[sortKey]||0; const medal=i<3?medals[i]:`<span style="font-size:.75rem;color:var(--text3)">#${i+1}</span>`; return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);background:${isMe?'rgba(74,144,217,.12)':'transparent'};border:${isMe?'1px solid rgba(74,144,217,.3)':'1px solid transparent'};margin-bottom:4px"><div style="width:28px;text-align:center;font-size:1.1rem">${medal}</div><div style="flex:1;min-width:0"><div style="font-size:.85rem;font-weight:${isMe?700:500};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${isMe?'':'cursor:pointer'}" ${isMe?'':('onclick="viewUserProfile(\''+r.uid+'\',\''+(r.pseudo||'').replace(/'/g,'')+'\')\"')}>${isMe?'⭐ ':''} ${r.pseudo||'?'}<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-left:5px;vertical-align:middle;${onlineUids.has(r.uid)?'':'display:none'}"></span></div><div style="font-size:.72rem;color:var(--text3)">Nv. ${r.level||1}</div></div><div style="font-size:.88rem;font-weight:700;color:var(--xp-color)">${xpVal.toLocaleString()} XP</div></div>`; }).join(''); // Stats comparatives
 const myRank=rows2.findIndex(r=>r.uid===currentUser?.uid);
 const myRow=myRank>=20?rows2[myRank]:null;
 const total=rows2.length;
@@ -2786,16 +2786,57 @@ async function removeFriend(uid, pseudo){
 }
 
 async function shareFlashcardDeck(){
-  const sid=parseInt(document.getElementById('fc-subj')?.value);
-  const ci=parseInt(document.getElementById('fc-chap')?.value);
-  const key=`${sid}_${ci}`;
-  const cards=flashcards[key]||[];
-  if(!cards.length){showToast('Aucune flashcard dans ce chapitre.');return;}
-  const s=subjects.find(x=>x.id===sid);
-  const chap=s?.chapters?.[ci]?.name||`Chapitre ${ci+1}`;
-  const confirmed=await new Promise(res=>showConfirm(`🌍 Partager "${chap}" ?`,`${cards.length} cartes seront visibles par tous les utilisateurs de Blokly.`,()=>res(true)));
-  if(!confirmed)return;
-  const pseudo=currentUser?.displayName||currentUser?.email?.split('@')[0]||'Anonyme';
+  if(!subjects.length){showToast('Aucune matière disponible.');return;}
+  // Construire la liste de tous les decks disponibles
+  const opts=[];
+  subjects.forEach(s=>{
+    (s.chapters||[]).forEach((c,ci)=>{
+      const key=`${s.id}_${ci}`;
+      const cards=flashcards[key]||[];
+      if(cards.length) opts.push({sid:s.id,ci,label:`${s.name} — ${c.name} (${cards.length} cartes)`,cards,s,chap:c.name});
+    });
+  });
+  if(!opts.length){showToast('Aucune flashcard disponible.');return;}
+  // Sélecteur
+  const existing=document.getElementById('fc-share-deck-picker');
+  if(existing) existing.remove();
+  const picker=document.createElement('div');
+  picker.id='fc-share-deck-picker';
+  picker.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10001;display:flex;align-items:center;justify-content:center';
+  picker.innerHTML=`<div style="background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);padding:1.2rem;width:420px;max-width:95vw;max-height:80vh;overflow-y:auto">
+    <div style="font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:12px">🌍 Choisir un deck à partager</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+      ${opts.map((o,i)=>`<button onclick="confirmShareDeck(${i})" style="text-align:left;padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.82rem;cursor:pointer" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">${o.label}</button>`).join('')}
+    </div>
+    <button onclick="document.getElementById('fc-share-deck-picker').remove()" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 14px;cursor:pointer;font-size:.8rem;color:var(--text2)">Annuler</button>
+  </div>`;
+  document.body.appendChild(picker);
+  window._fcShareDeckOpts=opts;
+}
+
+async function confirmShareDeck(optIdx){
+  document.getElementById('fc-share-deck-picker')?.remove();
+  const opt=window._fcShareDeckOpts[optIdx];
+  if(!opt)return;
+  showConfirm(`🌍 Partager "${opt.chap}" ?`,`${opt.cards.length} cartes seront visibles par tous les utilisateurs de Blokly.`,async()=>{
+    const pseudo=currentUser?.displayName||currentUser?.email?.split('@')[0]||'Anonyme';
+    try{
+      const deckId=`${currentUser.uid}_${opt.sid}_${opt.ci}`;
+      await setDoc(doc(db,'public_flashcards',deckId),{
+        uid:currentUser.uid, pseudo,
+        subject:opt.s?.name||'Inconnu', chapter:opt.chap,
+        color:opt.s?.color||'#4A90D9',
+        cards:opt.cards.map(c=>({q:c.q,a:c.a})),
+        count:opt.cards.length,
+        sharedAt:new Date().toISOString()
+      });
+      showToast(`✅ Deck "${opt.chap}" partagé dans la bibliothèque !`);
+    }catch(e){ showToast('Erreur lors du partage.'); }
+  });
+}
+window.confirmShareDeck=confirmShareDeck;
+
+async function _oldShareFlashcardDeck(){ const pseudo=currentUser?.displayName||currentUser?.email?.split('@')[0]||'Anonyme';
   try{
     const deckId=`${currentUser.uid}_${sid}_${ci}`;
     await setDoc(doc(db,'public_flashcards',deckId),{
@@ -2854,26 +2895,55 @@ function renderLibrary(data){
   }).join('');
 }
 
-async function importFromLibrary(deckId){
+function importFromLibrary(deckId){
   const deck=libraryData.find(d=>d.id===deckId);
   if(!deck){showToast('Deck introuvable.');return;}
   if(!subjects.length){showToast('Ajoute d\'abord une matière.');return;}
-  const sid=parseInt(document.getElementById('fc-subj')?.value);
-  const ci=parseInt(document.getElementById('fc-chap')?.value);
-  const key=`${sid}_${ci}`;
+  // Sélecteur de destination
+  const existing=document.getElementById('fc-import-dest-picker');
+  if(existing) existing.remove();
+  const opts=[];
+  subjects.forEach(s=>{
+    (s.chapters||[]).forEach((c,ci)=>{
+      opts.push({sid:s.id,ci,label:`${s.name} — ${c.name}`});
+    });
+  });
+  const picker=document.createElement('div');
+  picker.id='fc-import-dest-picker';
+  picker.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10002;display:flex;align-items:center;justify-content:center';
+  picker.innerHTML=`<div style="background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);padding:1.2rem;width:420px;max-width:95vw;max-height:80vh;overflow-y:auto">
+    <div style="font-size:.95rem;font-weight:700;color:var(--text);margin-bottom:4px">📥 Importer dans quel chapitre ?</div>
+    <div style="font-size:.78rem;color:var(--text3);margin-bottom:12px">${deck.count} cartes de "${deck.subject} — ${deck.chapter}"</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+      ${opts.map((o,i)=>`<button onclick="doImportFromLibrary('${deckId}',${i})" style="text-align:left;padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:.82rem;cursor:pointer" onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'">${o.label}</button>`).join('')}
+    </div>
+    <button onclick="document.getElementById('fc-import-dest-picker').remove()" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 14px;cursor:pointer;font-size:.8rem;color:var(--text2)">Annuler</button>
+  </div>`;
+  document.body.appendChild(picker);
+  window._fcImportDestOpts=opts;
+}
+
+function doImportFromLibrary(deckId, optIdx){
+  document.getElementById('fc-import-dest-picker')?.remove();
+  const deck=libraryData.find(d=>d.id===deckId);
+  const opt=window._fcImportDestOpts[optIdx];
+  if(!deck||!opt)return;
+  const key=`${opt.sid}_${opt.ci}`;
   if(!flashcards[key]) flashcards[key]=[];
   let added=0;
   deck.cards.forEach(c=>{
     if(!flashcards[key].some(x=>x.q.toLowerCase()===c.q.toLowerCase())){
-      flashcards[key].push({q:c.q,a:c.a,ok:undefined});
+      flashcards[key].push({q:c.q,a:c.a,ok:null});
       added++;
     }
   });
   closeModal('modal-library');
   scheduleSave();
-  renderFCList();
-  showToast(`✅ ${added} carte${added>1?'s':''} importée${added>1?'s':''} !`);
-} window.openProfileModal=openProfileModal; window.closeProfileModal=closeProfileModal; window.saveProfile=saveProfile;
+  const fcSubj=document.getElementById('fc-subj');
+  if(fcSubj){fcSubj.value=opt.sid;fcLoadChaps();setTimeout(()=>{document.getElementById('fc-chap').value=opt.ci;renderFCList();},100);}
+  showToast(`✅ ${added} carte${added>1?'s':''} importée${added>1?'s':''} dans "${opt.label}" !`);
+}
+window.doImportFromLibrary=doImportFromLibrary; window.openProfileModal=openProfileModal; window.closeProfileModal=closeProfileModal; window.saveProfile=saveProfile;
 window.switchProfileTab=switchProfileTab; window.searchFriend=searchFriend; window.sendFriendRequest=sendFriendRequest;
 window.acceptFriendRequest=acceptFriendRequest; window.declineFriendRequest=declineFriendRequest; window.removeFriend=removeFriend;
 
@@ -3058,11 +3128,11 @@ async function renderGroups(){
     snap.forEach(d=>{ const g=d.data(); if(g.members?.[currentUser.uid]) myGroups.push(g); });
     if(!myGroups.length){ el.innerHTML=`<div style="text-align:center;padding:1.5rem;color:var(--text3);font-size:.85rem">Aucun groupe — crée-en un ou rejoins-en un avec un code !</div>`; return; }
     el.innerHTML=myGroups.map(g=>{
-      const members=Object.values(g.members||{}).sort((a,b)=>(b.xp||0)-(a.xp||0));
+      const members=Object.entries(g.members||{}).map(([uid,m])=>({...m,uid})).sort((a,b)=>(b.xp||0)-(a.xp||0));
       const membersHtml=members.map(m=>`
         <div class="group-member">
           <div class="group-avatar">${(m.pseudo[0]||'?').toUpperCase()}</div>
-          <div style="flex:1;font-size:.82rem;color:var(--text);cursor:pointer" onclick="viewUserProfile('${m.uid||''}','${m.pseudo}')">${m.pseudo}${m.pseudo===(currentUser?.displayName||currentUser?.email?.split('@')[0])?' (toi)':''}</div>
+          <div style="flex:1;font-size:.82rem;color:var(--text);cursor:pointer" onclick="viewUserProfile('${m.uid||''}','${m.pseudo}')">${m.pseudo}${m.pseudo===(currentUser?.displayName||currentUser?.email?.split('@')[0])?' (toi)':''}${m.uid&&onlineUids.has(m.uid)?'<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-left:5px;vertical-align:middle"></span>':''}</div>
           <div style="font-size:.72rem;color:var(--text3)">Nv.${m.level||1} · ${(m.xp||0).toLocaleString()} XP</div>
         </div>`).join('');
       const isOwner=g.createdBy===currentUser.uid;
@@ -3424,6 +3494,8 @@ window.toggleEmojiPicker=toggleEmojiPicker; window.insertEmoji=insertEmoji;
 window.openShareFlashcardInChat=openShareFlashcardInChat; window.chatInputChanged=chatInputChanged;
 
 async function deleteSharedDeck(deckId, chapName){
+  closeModal('modal-library');
+  await new Promise(r=>setTimeout(r,150));
   showConfirm(`🗑 Retirer "${chapName}" de la bibliothèque ?`,'Les autres utilisateurs ne pourront plus l\'importer.',async()=>{
     try{
       await deleteDoc(doc(db,'public_flashcards',deckId));
@@ -3434,7 +3506,7 @@ async function deleteSharedDeck(deckId, chapName){
   });
 }
 window.deleteSharedDeck=deleteSharedDeck;
-window.shareFlashcardDeck=shareFlashcardDeck; window.openLibrary=openLibrary; window.filterLibrary=filterLibrary; window.importFromLibrary=importFromLibrary;
+window.shareFlashcardDeck=shareFlashcardDeck; window.openLibrary=openLibrary; window.filterLibrary=filterLibrary; window.importFromLibrary=importFromLibrary; window.confirmShareDeck=confirmShareDeck; window.doImportFromLibrary=doImportFromLibrary;
 window.startDemo = startDemo;
 window.endDemo = endDemo;
 window.db = db;
@@ -3667,7 +3739,7 @@ col.addEventListener('drop',e=>{
 }); if(isExam){const m=document.createElement('div');m.className='exam-day-marker';col.appendChild(m);} for(let i=0;i<TOTAL_H;i++){ if(i>0){const l=document.createElement('div');l.style.cssText=`position:absolute;top:${i*PX_H}px;left:0;right:0;border-top:1px solid var(--border);pointer-events:none`;col.appendChild(l);} const half=document.createElement('div');half.style.cssText=`position:absolute;top:${i*PX_H+PX_H/2}px;left:0;right:0;border-top:1px dashed var(--border);opacity:.3;pointer-events:none`;col.appendChild(half); for(let q=0;q<4;q++){ const dz=document.createElement('div'); const slotH=PX_H/4,topPx=i*PX_H+q*slotH,slotDec=START_H+i+q*0.25; dz.style.cssText=`position:absolute;top:${topPx}px;left:0;right:0;height:${slotH}px;z-index:1`; dz.addEventListener('dragover',e=>{e.preventDefault();col.style.outline='2px dashed var(--blue)';}); dz.addEventListener('dragleave',()=>{col.style.outline='';}); dz.addEventListener('drop',e=>{e.preventDefault();col.style.outline='';onDrop(d,slotDec);}); col.appendChild(dz); } } const revBlocks=blocksOnDay(d,wkOff).filter(b=>b.type==='rev').sort((a,b)=>a.hour-b.hour); const groups=[]; revBlocks.forEach(b=>{let placed=false;for(const g of groups){if(g.some(x=>!(x.hour+x.dur<=b.hour||b.hour+b.dur<=x.hour))){g.push(b);placed=true;break;}}if(!placed)groups.push([b]);}); groups.forEach(g=>{const n=g.length;g.forEach((b,gi)=>{ const topPx=decHToTop(b.hour),heightPx=Math.max(b.dur*PX_H-3,18); const s=subjects.find(x=>x.id===b.subj); const srDue=hasAnySRDue(b.subj); const el=document.createElement('div'); el.className='rev-block'+(b.status==='done'?' done':''); const wPct=Math.floor(100/n),leftPct=gi*wPct; el.style.cssText=`background:${s?s.color:'#888'};top:${topPx}px;height:${heightPx}px;left:calc(${leftPct}% + 1px);width:calc(${wPct}% - 2px);position:absolute;`; el.dataset.id=b.id;el.draggable=true; const chapLabel=b.chapIndices&&b.chapIndices.length&&s?.chapters
   ? b.chapIndices.map(i=>'Ch.'+(i+1)).join(', ')
   : '';
-el.innerHTML=`${n>1?'<div class="conflict-dot"></div>':''}${srDue?'<div class="sr-due-dot"></div>':''}<span class="bn">${s?s.name:'?'}</span>${chapLabel?`<div class="rev-block-chaps">📖 ${chapLabel}</div>`:''} ${b.task?`<div style="font-size:.62rem;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.task}</div>`:''}<div style="font-size:.58rem;opacity:.65">${hm(b.hour)}–${hm(b.hour+b.dur)}</div>`; el.addEventListener('dragstart',e=>{dragData={type:'move',id:b.id};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text','m');}); el.addEventListener('contextmenu',e=>{e.preventDefault();showCtx(e,b.id);}); el.addEventListener('dblclick',e=>{e.stopPropagation();quickToggle(b.id);}); el.addEventListener('touchstart',e=>{lpTimer=setTimeout(()=>{const touch=e.touches[0];showCtx({clientX:touch.clientX,clientY:touch.clientY,preventDefault:()=>{}},b.id);},600);},{passive:true}); el.addEventListener('touchend',()=>clearTimeout(lpTimer),{passive:true}); col.appendChild(el); });}); blocksOnDay(d,wkOff).filter(b=>b.type==='pause').forEach(b=>{ const topPx=decHToTop(b.hour),durDec=b.dur/60,heightPx=Math.max(durDec*PX_H-2,14); const el=document.createElement('div');el.className='pause-blk'; el.style.cssText=`top:${topPx}px;height:${heightPx}px;left:1px;right:1px;position:absolute;z-index:2;pointer-events:none;`; el.dataset.id=b.id;el.draggable=true;el.textContent=b.label||'Pause';
+el.innerHTML=`${n>1?'<div class="conflict-dot"></div>':''}${srDue?'<div class="sr-due-dot"></div>':''}<span class="bn">${s?s.name:'?'}</span>${chapLabel?`<div class="rev-block-chaps">📖 ${chapLabel}</div>`:''} ${b.task?`<div style="font-size:.62rem;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.task}</div>`:''}<div style="font-size:.58rem;opacity:.65">${hm(b.hour)}–${hm(b.hour+b.dur)}</div>`; el.addEventListener('dragstart',e=>{dragData={type:'move',id:b.id};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text','m');}); el.addEventListener('contextmenu',e=>{e.preventDefault();showCtx(e,b.id);}); el.addEventListener('dblclick',e=>{e.stopPropagation();quickToggle(b.id);}); el.addEventListener('touchstart',e=>{lpTimer=setTimeout(()=>{const touch=e.touches[0];showCtx({clientX:touch.clientX,clientY:touch.clientY,preventDefault:()=>{}},b.id);},600);},{passive:true}); el.addEventListener('touchend',()=>clearTimeout(lpTimer),{passive:true}); col.appendChild(el); });}); blocksOnDay(d,wkOff).filter(b=>b.type==='pause').forEach(b=>{ const topPx=decHToTop(b.hour),durDec=b.dur/60,heightPx=Math.max(durDec*PX_H-2,14); const el=document.createElement('div');el.className='pause-blk'; el.style.cssText=`top:${topPx}px;height:${heightPx}px;left:1px;right:1px;position:absolute;z-index:2;`; el.dataset.id=b.id;el.draggable=true;el.textContent=b.label||'Pause';
 el.addEventListener('dragstart',e=>{dragData={type:'move',id:b.id};e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text','m');});
 el.addEventListener('contextmenu',e=>{e.preventDefault();showCtx(e,b.id);}); col.appendChild(el); }); outer.appendChild(col); } wrapper.appendChild(outer); renderOverload('overload-bar'); }
 
@@ -3862,7 +3934,7 @@ function renderFCList(){ const sid=parseInt(document.getElementById('fc-subj').v
 window._delCard=(key,idx)=>{showConfirm('🗑 Supprimer cette carte ?','',()=>{flashcards[key].splice(idx,1);renderFCList();scheduleSave();});};
 function openAddCard(){ if(!subjects.length){showToast('Ajoute d\'abord une matière.');return;} document.getElementById('fc-new-subj').innerHTML=subjects.map(s=>`<option value="${s.id}">${s.name}</option>`).join(''); const curSid=document.getElementById('fc-subj')?.value;if(curSid)document.getElementById('fc-new-subj').value=curSid; updateFCNewChap(); document.getElementById('fc-q').value='';document.getElementById('fc-a').value=''; openModal('modal-add-card'); }
 function updateFCNewChap(){ const sid=parseInt(document.getElementById('fc-new-subj').value); const s=subjects.find(x=>x.id===sid);if(!s)return; document.getElementById('fc-new-chap').innerHTML=(s.chapters||Array.from({length:s.chaps},(_,i)=>({name:'Chapitre '+(i+1)}))).map((c,i)=>`<option value="${i}">${c.name}</option>`).join(''); }
-function saveCard(){ const sid=parseInt(document.getElementById('fc-new-subj').value); const ci=parseInt(document.getElementById('fc-new-chap').value); const q=document.getElementById('fc-q').value.trim(); const a=document.getElementById('fc-a').value.trim(); if(!q||!a){showToast('Remplis la question et la réponse.');return;} const key=`${sid}_${ci}`;if(!flashcards[key])flashcards[key]=[]; flashcards[key].push({q,a,ok:undefined}); closeModal('modal-add-card'); const ss=document.getElementById('fc-subj');if(ss)ss.value=sid; fcLoadChaps();renderFCList();showToast('🃏 Flashcard ajoutée !');scheduleSave(); }
+function saveCard(){ const sid=parseInt(document.getElementById('fc-new-subj').value); const ci=parseInt(document.getElementById('fc-new-chap').value); const q=document.getElementById('fc-q').value.trim(); const a=document.getElementById('fc-a').value.trim(); if(!q||!a){showToast('Remplis la question et la réponse.');return;} const key=`${sid}_${ci}`;if(!flashcards[key])flashcards[key]=[]; flashcards[key].push({q,a,ok:null}); closeModal('modal-add-card'); saveToLS(); const ss=document.getElementById('fc-subj');if(ss)ss.value=sid; fcLoadChaps();renderFCList();showToast('🃏 Flashcard ajoutée !');scheduleSave(); }
 // ── IMPORT FLASHCARDS ──
 function openImportCards(){
   if(!subjects.length){showToast('Ajoute d\'abord une matière.');return;}
@@ -3962,16 +4034,13 @@ async function confirmImport(){
   const key=`${sid}_${ci}`;
   if(!flashcards[key]) flashcards[key]=[];
   
-  // Ferme le modal D'ABORD avant tout traitement lourd
   closeModal('modal-import-cards');
-  
-  // Petit délai pour laisser Firebase respirer
-  await new Promise(r => setTimeout(r, 100));
+  await new Promise(r => setTimeout(r, 300));
   
   let added=0;
   cards.forEach(c=>{
     if(!flashcards[key].some(x=>x.q.toLowerCase()===c.q.toLowerCase())){
-      flashcards[key].push({q:c.q,a:c.a,ok:undefined});
+      flashcards[key].push({q:c.q,a:c.a,ok:null});
       added++;
     }
   });
