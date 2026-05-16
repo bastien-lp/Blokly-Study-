@@ -71,6 +71,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .land-cta-secondary:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35)}
 .land-hero-note{font-size:.75rem;color:rgba(255,255,255,.3)}
 
+.todo-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;transition:all .2s;position:relative}
+.todo-item.done{opacity:.5}
+.todo-item.done .todo-title{text-decoration:line-through;color:var(--text3)}
+.todo-item.overdue{border-left:3px solid var(--red)}
+.todo-checkbox{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;margin-top:1px;transition:all .2s}
+.todo-checkbox.checked{background:var(--green);border-color:var(--green);color:#fff}
+.todo-title{font-size:.85rem;font-weight:600;color:var(--text);flex:1}
+.todo-meta{font-size:.72rem;color:var(--text3);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.todo-priority{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:700;padding:1px 7px;border-radius:20px}
+.todo-priority.high{background:var(--danger-bg);color:var(--danger-text)}
+.todo-priority.medium{background:var(--warn-bg);color:var(--warn-text)}
+.todo-priority.low{background:var(--success-bg);color:var(--success-text)}
+.todo-filter-btn{padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:.75rem;font-weight:500;color:var(--text2);transition:all .15s}
+.todo-filter-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.todo-streak{display:inline-flex;align-items:center;gap:4px;background:var(--warn-bg);color:var(--warn-text);border-radius:20px;padding:3px 10px;font-size:.75rem;font-weight:700}
+
+
 .lb-tab{padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .18s}
 .lb-tab:hover{background:var(--border);color:var(--text)}
 .lb-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
@@ -1358,7 +1375,7 @@ button.danger-btn:hover{background:var(--red);color:#fff}
 
   <div class="tabs" id="main-tabs">
     <button class="tab active" onclick="switchTab('planning')" data-tab="planning">Planning</button>
-    
+    <button class="tab" onclick="switchTab('todo')" data-tab="todo">✅ To-do</button>
     <button class="tab" onclick="switchTab('progress')" data-tab="progress">Progression</button>
     <button class="tab" onclick="switchTab('confidence')" data-tab="confidence">Confiance</button>
     <button class="tab" onclick="switchTab('syntheses')" data-tab="syntheses">Synthèses</button>
@@ -1731,6 +1748,65 @@ button.danger-btn:hover{background:var(--red);color:#fff}
     </div>
   </div>
 </div>
+
+<div id="page-todo" class="page">
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+      <div class="section-title" style="margin:0">✅ To-do liste</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="todo-streak-display"></div>
+        <button class="primary" onclick="openAddTodo()">+ Tâche</button>
+      </div>
+    </div>
+    <!-- Filtres -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="todo-filter-btn active" onclick="setTodoFilter('all',this)">Toutes</button>
+      <button class="todo-filter-btn" onclick="setTodoFilter('todo',this)">À faire</button>
+      <button class="todo-filter-btn" onclick="setTodoFilter('done',this)">Faites</button>
+      <button class="todo-filter-btn" onclick="setTodoFilter('high',this)">🔴 Urgentes</button>
+      <select id="todo-filter-subj" onchange="renderTodos()" style="padding:5px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:.75rem">
+        <option value="">Toutes les matières</option>
+      </select>
+    </div>
+    <!-- Stats rapides -->
+    <div id="todo-stats" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap"></div>
+    <!-- Liste -->
+    <div id="todo-list"></div>
+  </div>
+</div>
+
+<!-- MODAL AJOUTER TÂCHE -->
+<div class="modal-bg" id="modal-add-todo">
+  <div class="modal" style="width:420px">
+    <h3>➕ Nouvelle tâche</h3>
+    <div class="fr"><label>Titre</label><input id="todo-title" placeholder="ex: Relire le chapitre 3"></div>
+    <div class="fr"><label>Priorité</label>
+      <select id="todo-priority">
+        <option value="high">🔴 Haute</option>
+        <option value="medium" selected>🟡 Moyenne</option>
+        <option value="low">🟢 Basse</option>
+      </select>
+    </div>
+    <div class="fr"><label>Matière (optionnel)</label>
+      <select id="todo-subj-link">
+        <option value="">— Aucune —</option>
+      </select>
+    </div>
+    <div class="fr"><label>Date limite (optionnel)</label><input id="todo-due" type="date"></div>
+    <div class="fr"><label>Récurrente ?</label>
+      <select id="todo-recur">
+        <option value="">Non</option>
+        <option value="daily">Chaque jour</option>
+        <option value="weekly">Chaque semaine</option>
+      </select>
+    </div>
+    <div class="brow">
+      <button class="ghost" onclick="closeModal('modal-add-todo')">Annuler</button>
+      <button class="primary" onclick="saveTodo()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
 
   <div id="page-journal" class="page">
     <div class="card">
@@ -2270,6 +2346,9 @@ let currentUser=null;
 let wkOff=0,mthOff=0,viewMode='week';
 let nid=100,editId=null,ctxId=null,dragData=null;
 let timerIv=null,timerOn=false,timerTotal=45*60,timerLeft=45*60;
+let wakeLock=null;
+async function requestWakeLock(){ try{ if('wakeLock' in navigator){ wakeLock=await navigator.wakeLock.request('screen'); } }catch(e){} }
+function releaseWakeLock(){ if(wakeLock){ wakeLock.release(); wakeLock=null; } }
 let pomoCycle=0,pomoPhase='work';
 let todaySess=0,todayMins=0,streak=0;
 let heatData=Array.from({length:28},()=>0);
@@ -2365,7 +2444,7 @@ function saveToLS(){
   try{ 
     localStorage.setItem(LS_KEY(currentUser.uid),JSON.stringify({
       subjects,blocks,journalEntries,srData,savedTemplates,heatData,flashcards,
-      streak,todaySess,todayMins,darkMode,nid,xp,level,unlockedThemes,currentTheme,
+      streak,todaySess,todayMins,darkMode,nid,xp,level,unlockedThemes,currentTheme,todos,
       earnedBadges:[...earnedBadges],
       totalFocusHours,lastStudyDate,weekLongSessions,
       _totalSRValidated,
@@ -2378,6 +2457,7 @@ if(d.totalFocusHours!==undefined)totalFocusHours=d.totalFocusHours;
 if(d.lastStudyDate)lastStudyDate=d.lastStudyDate;
 if(d.weekLongSessions!==undefined)weekLongSessions=d.weekLongSessions;
 if(d._totalSRValidated!==undefined)_totalSRValidated=d._totalSRValidated;
+if(d.todos)todos=d.todos;
 if(d.xpToday!==undefined)xpToday=d.xpToday; if(d.xpThisWeek!==undefined)xpThisWeek=d.xpThisWeek;
 if(d.lastXPDateDay)lastXPDateDay=d.lastXPDateDay; if(d.lastXPDateWeek)lastXPDateWeek=d.lastXPDateWeek;
 const todayKey=new Date().toISOString().slice(0,10); const weekKey=getWeekKey();
@@ -2385,13 +2465,165 @@ if(lastXPDateDay!==todayKey){xpToday=0;lastXPDateDay=todayKey;}
 if(lastXPDateWeek!==weekKey){xpThisWeek=0;lastXPDateWeek=weekKey;}
 return subjects.length>0||blocks.length>0; }catch(e){return false;} }
 
+
+// ── TO-DO ──
+let todos=[];
+let todoFilter='all';
+let todoStreakDays=0;
+
+function openAddTodo(){
+  document.getElementById('todo-title').value='';
+  document.getElementById('todo-priority').value='medium';
+  document.getElementById('todo-due').value='';
+  document.getElementById('todo-recur').value='';
+  const sel=document.getElementById('todo-subj-link');
+  sel.innerHTML='<option value="">— Aucune —</option>'+subjects.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  openModal('modal-add-todo');
+  setTimeout(()=>document.getElementById('todo-title').focus(),100);
+}
+
+function saveTodo(){
+  const title=document.getElementById('todo-title').value.trim();
+  if(!title){showToast('Donne un titre à la tâche.');return;}
+  const priority=document.getElementById('todo-priority').value;
+  const subjId=document.getElementById('todo-subj-link').value;
+  const due=document.getElementById('todo-due').value;
+  const recur=document.getElementById('todo-recur').value;
+  todos.push({
+    id:Date.now(),
+    title,priority,
+    subjId:subjId?parseInt(subjId):'',
+    due,recur,
+    done:false,
+    createdAt:new Date().toISOString(),
+    doneAt:null
+  });
+  closeModal('modal-add-todo');
+  renderTodos();
+  scheduleSave();
+  showToast('✅ Tâche ajoutée !');
+}
+
+function setTodoFilter(f,btn){
+  todoFilter=f;
+  document.querySelectorAll('.todo-filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderTodos();
+}
+
+function toggleTodo(id){
+  const t=todos.find(x=>x.id===id);
+  if(!t)return;
+  t.done=!t.done;
+  t.doneAt=t.done?new Date().toISOString():null;
+  if(t.done){
+    addXP(10);
+    showToast('✅ Tâche accomplie ! +10 XP 🎯');
+    checkBadges();
+    // Recréer si récurrente
+    if(t.recur){
+      const next={...t,id:Date.now()+1,done:false,doneAt:null,createdAt:new Date().toISOString()};
+      if(t.recur==='daily'&&t.due){ const d=new Date(t.due); d.setDate(d.getDate()+1); next.due=d.toISOString().slice(0,10); }
+      if(t.recur==='weekly'&&t.due){ const d=new Date(t.due); d.setDate(d.getDate()+7); next.due=d.toISOString().slice(0,10); }
+      setTimeout(()=>{ todos.push(next); renderTodos(); scheduleSave(); },300);
+    }
+  }
+  // Archiver les tâches faites après 24h
+  const now=Date.now();
+  todos=todos.filter(x=>!x.done||!x.doneAt||(now-new Date(x.doneAt).getTime())<86400000);
+  renderTodos();
+  scheduleSave();
+}
+
+function deleteTodo(id){
+  todos=todos.filter(x=>x.id!==id);
+  renderTodos();
+  scheduleSave();
+}
+
+function renderTodos(){
+  const el=document.getElementById('todo-list');
+  const statsEl=document.getElementById('todo-stats');
+  const streakEl=document.getElementById('todo-streak-display');
+  if(!el)return;
+
+  // Mettre à jour select matière filtre
+  const fs=document.getElementById('todo-filter-subj');
+  if(fs){
+    const cur=fs.value;
+    fs.innerHTML='<option value="">Toutes les matières</option>'+subjects.map(s=>`<option value="${s.id}"${s.id==cur?' selected':''}>${s.name}</option>`).join('');
+  }
+
+  const now=new Date(); now.setHours(0,0,0,0);
+  const filterSubj=document.getElementById('todo-filter-subj')?.value;
+
+  // Stats
+  const total=todos.length;
+  const done=todos.filter(t=>t.done).length;
+  const overdue=todos.filter(t=>!t.done&&t.due&&new Date(t.due)<now).length;
+  if(statsEl) statsEl.innerHTML=`
+    <div class="smc"><div class="smv">${total-done}</div><div class="sml">À faire</div></div>
+    <div class="smc"><div class="smv" style="color:var(--green)">${done}</div><div class="sml">Faites</div></div>
+    ${overdue?`<div class="smc"><div class="smv" style="color:var(--red)">${overdue}</div><div class="sml">En retard</div></div>`:''}
+  `;
+
+  // Streak
+  const todayDone=todos.filter(t=>t.done&&t.doneAt&&t.doneAt.slice(0,10)===new Date().toISOString().slice(0,10)).length;
+  if(streakEl) streakEl.innerHTML=todayDone>0?`<div class="todo-streak">🔥 ${todayDone} tâche${todayDone>1?'s':''} aujourd'hui</div>`:'';
+
+  // Filtrer
+  let filtered=todos.filter(t=>{
+    if(filterSubj&&String(t.subjId)!==filterSubj)return false;
+    if(todoFilter==='todo')return!t.done;
+    if(todoFilter==='done')return t.done;
+    if(todoFilter==='high')return!t.done&&t.priority==='high';
+    return true;
+  });
+
+  // Trier : urgentes d'abord, puis par date limite, puis par priorité
+  const pOrder={high:0,medium:1,low:2};
+  filtered.sort((a,b)=>{
+    if(a.done!==b.done)return a.done?1:-1;
+    const aOver=a.due&&new Date(a.due)<now;
+    const bOver=b.due&&new Date(b.due)<now;
+    if(aOver!==bOver)return aOver?-1:1;
+    if(a.due&&b.due)return new Date(a.due)-new Date(b.due);
+    if(a.due)return -1; if(b.due)return 1;
+    return pOrder[a.priority]-pOrder[b.priority];
+  });
+
+  if(!filtered.length){ el.innerHTML=`<div style="text-align:center;padding:2rem;color:var(--text3);font-size:.85rem">${todoFilter==='done'?'Aucune tâche accomplie.':'🎉 Aucune tâche — ajoutes-en une !'}</div>`; return; }
+
+  el.innerHTML=filtered.map(t=>{
+    const s=subjects.find(x=>x.id===t.subjId);
+    const isOverdue=!t.done&&t.due&&new Date(t.due)<now;
+    const dueLabel=t.due?`📅 ${new Date(t.due).toLocaleDateString('fr-FR')}${isOverdue?' ⚠️ En retard':''}`:'' ;
+    const priorityLabel={high:'🔴 Haute',medium:'🟡 Moyenne',low:'🟢 Basse'}[t.priority];
+    return`<div class="todo-item${t.done?' done':''}${isOverdue?' overdue':''}">
+      <div class="todo-checkbox${t.done?' checked':''}" onclick="toggleTodo(${t.id})">${t.done?'✓':''}</div>
+      <div style="flex:1;min-width:0">
+        <div class="todo-title">${t.title}${t.recur?` <span style="font-size:.65rem;color:var(--blue);font-weight:600">${t.recur==='daily'?'🔄 Quotidien':'🔄 Hebdo'}</span>`:''}</div>
+        <div class="todo-meta">
+          <span class="todo-priority ${t.priority}">${priorityLabel}</span>
+          ${s?`<span style="color:${s.color};font-weight:600">● ${s.name}</span>`:''}
+          ${dueLabel?`<span style="${isOverdue?'color:var(--red);font-weight:600':''}">${dueLabel}</span>`:''}
+        </div>
+      </div>
+      <button onclick="deleteTodo(${t.id})" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:.88rem;padding:2px 6px;border-radius:4px;transition:color .15s" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text3)'">🗑</button>
+    </div>`;
+  }).join('');
+}
+window.openAddTodo=openAddTodo; window.saveTodo=saveTodo; window.setTodoFilter=setTodoFilter;
+window.toggleTodo=toggleTodo; window.deleteTodo=deleteTodo;
+
+
 function scheduleSave(){ saveToLS(); if(saveScheduled)return; saveScheduled=true; setTimeout(()=>{saveScheduled=false;saveToCloud();},3000); }
 async function saveToCloud(){ if(!currentUser)return; setSyncState('syncing'); try{ await setDoc(doc(db,'users',currentUser.uid,'data','main'),{
   subjects,blocks,journalEntries,srData,heatData,flashcards,
   streak,todaySess,todayMins,darkMode,nid,xp,level,unlockedThemes,currentTheme,
   earnedBadges:[...earnedBadges],
   totalFocusHours,lastStudyDate,weekLongSessions,_totalSRValidated,
-  xpToday,xpThisWeek,lastXPDateDay,lastXPDateWeek,
+  xpToday,xpThisWeek,lastXPDateDay,lastXPDateWeek,todos,
   updatedAt:new Date().toISOString()
 }); await saveTemplatesToCloud(); setSyncState('ok'); }catch(e){console.error('saveToCloud:',e); if(e.code!=='unavailable') setSyncState('error');} }
 async function saveTemplatesToCloud(){ if(!currentUser)return; try{ await setDoc(doc(db,'users',currentUser.uid,'data','templates'),{savedTemplates,updatedAt:new Date().toISOString()}); }catch(e){} }
@@ -2400,6 +2632,7 @@ if(d.totalFocusHours!==undefined)totalFocusHours=d.totalFocusHours;
 if(d.lastStudyDate)lastStudyDate=d.lastStudyDate;
 if(d.weekLongSessions!==undefined)weekLongSessions=d.weekLongSessions;
 if(d._totalSRValidated!==undefined)_totalSRValidated=d._totalSRValidated;
+if(d.todos)todos=d.todos;
 if(d.xpToday!==undefined)xpToday=d.xpToday; if(d.xpThisWeek!==undefined)xpThisWeek=d.xpThisWeek;
 if(d.lastXPDateDay)lastXPDateDay=d.lastXPDateDay; if(d.lastXPDateWeek)lastXPDateWeek=d.lastXPDateWeek;
 const todayKey=new Date().toISOString().slice(0,10); const weekKey=getWeekKey();
@@ -2458,7 +2691,7 @@ function resetAppState(){
   subjects=[];blocks=[];journalEntries=[];srData={};savedTemplates=[]; 
   heatData=Array.from({length:28},()=>0);flashcards={}; 
   streak=0;todaySess=0;todayMins=0;darkMode=false;nid=100; 
-  xp=0;level=1; unlockedThemes=['default'];currentTheme='default'; 
+  xp=0;level=1; unlockedThemes=['default'];currentTheme='default'; todos=[]; 
   undoStack=[];redoStack=[];earnedBadges=new Set(); 
   timerSessionElapsed=0;
   _nightOwlUnlocked=false;_earlyBirdUnlocked=false;
@@ -3627,6 +3860,7 @@ document.addEventListener('click',e=>{ if(!document.getElementById('ctx').contai
 
 function switchTab(tp){ document.querySelectorAll('.tab,.tab-study').forEach(el=>el.classList.remove('active')); document.querySelectorAll('.tab,.tab-study').forEach(el=>{if(el.dataset.tab===tp)el.classList.add('active');}); document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); const pg=document.getElementById('page-'+tp);if(pg)pg.classList.add('active'); if(tp==='planning')renderPlanning(); if(tp==='agenda')renderAgenda();
 if(tp==='progress'){renderProgress();renderProgChart();renderAgenda();} if(tp==='progress'){renderProgress();renderProgChart();renderAgenda();} if(tp==='confidence'){renderConf();renderPredict();} if(tp==='syntheses')renderSynth(); if(tp==='flashcards')initFlashcardsPage(); if(tp==='repetition')renderRepetition(); if(tp==='exams'){renderExams();renderOverload('overload-bar2');} if(tp==='stats'){renderXPStats();renderPieChart();renderBadges();renderWeeklyRecap();renderHeat('heatmap-stats');renderThemeButtons();renderLeaderboard();} if(tp==='groups')renderGroups();
+if(tp==='todo'){renderTodos();}
 if(tp==='journal')renderJournal(); if(tp==='study')renderStudy(); bubbleHidden=false;if(timerOn)updateBubble(true,false); }
 function setView(v){ viewMode=v; document.getElementById('vt-week').classList.toggle('active',v==='week'); document.getElementById('vt-month').classList.toggle('active',v==='month'); document.getElementById('view-week').style.display=v==='week'?'block':'none'; document.getElementById('view-month').style.display=v==='month'?'block':'none'; document.getElementById('overload-section').style.display=v==='week'?'block':'none'; renderPlanning(); }
 function changeNav(d){if(viewMode==='week')wkOff+=d;else mthOff+=d;renderPlanning();}
@@ -4335,7 +4569,7 @@ function onModeChange(){
   resetTimer();
 }
 function resetTimer(){ if(timerIv){clearInterval(timerIv);timerIv=null;}timerOn=false; timerSessionElapsed=0; setPresenceActive(false); const m=document.getElementById('study-mode')?.value||'custom'; const durRaw=document.getElementById('study-dur')?.value; const durSel=durRaw==='custom'?parseInt(document.getElementById('study-dur-custom')?.value||45)||45:parseInt(durRaw||45); if(m==='pomodoro'){timerTotal=25*60;pomoPhase='work';}else if(m==='pomodoro50'){timerTotal=50*60;pomoPhase='work';}else timerTotal=durSel*60; timerLeft=timerTotal; document.getElementById('timer-disp').textContent=hms(timerLeft); document.getElementById('focus-time-big').textContent=hms(timerLeft); document.getElementById('timer-lbl').textContent='prêt'; document.getElementById('btn-start').textContent='▶ Démarrer'; document.getElementById('focus-btn-start').textContent='▶ Démarrer'; document.getElementById('sdot').style.animation=''; updateBubble(false); updateRing(); updateXPPreview(); }
-function timerToggle(){ if(timerOn){ clearInterval(timerIv);timerIv=null;timerOn=false; setPresenceActive(false); document.getElementById('btn-start').textContent='▶ Reprendre'; document.getElementById('focus-btn-start').textContent='▶ Reprendre'; document.getElementById('timer-lbl').textContent='pause'; document.getElementById('sdot').style.animation='pulse 1.4s infinite'; document.getElementById('bubble-dot').classList.add('paused'); } else { if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} timerOn=true; if(userProfile.privacy?.online!==false) setPresenceActive(true); const h=new Date().getHours(); if(h>=22) _nightOwlUnlocked=true; document.getElementById('btn-start').textContent='⏸ Pause'; document.getElementById('focus-btn-start').textContent='⏸ Pause'; document.getElementById('timer-lbl').textContent='en cours'; document.getElementById('sdot').style.animation=''; document.getElementById('bubble-dot').classList.remove('paused'); updateBubble(true,false); timerIv=setInterval(timerTick,1000); } }
+function timerToggle(){ if(timerOn){ clearInterval(timerIv);timerIv=null;timerOn=false; setPresenceActive(false); document.getElementById('btn-start').textContent='▶ Reprendre'; document.getElementById('focus-btn-start').textContent='▶ Reprendre'; document.getElementById('timer-lbl').textContent='pause'; document.getElementById('sdot').style.animation='pulse 1.4s infinite'; document.getElementById('bubble-dot').classList.add('paused'); } else { if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} timerOn=true; if(userProfile.privacy?.online!==false) setPresenceActive(true); requestWakeLock(); const h=new Date().getHours(); if(h>=22) _nightOwlUnlocked=true; document.getElementById('btn-start').textContent='⏸ Pause'; document.getElementById('focus-btn-start').textContent='⏸ Pause'; document.getElementById('timer-lbl').textContent='en cours'; document.getElementById('sdot').style.animation=''; document.getElementById('bubble-dot').classList.remove('paused'); updateBubble(true,false); timerIv=setInterval(timerTick,1000); } }
 function timerTick(){ timerLeft--;timerSessionElapsed++; if(timerLeft<=0){timerEnd();return;} document.getElementById('timer-disp').textContent=hms(timerLeft); document.getElementById('focus-time-big').textContent=hms(timerLeft); document.getElementById('bubble-time').textContent=hms(timerLeft); updateRing(); }
 function timerEnd(){ 
   clearInterval(timerIv);timerIv=null;timerOn=false; 
